@@ -1,0 +1,19 @@
+import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+
+@Entity({ name: "user" }) // Use the actual table name
+export class User {
+  @PrimaryGeneratedColumn({ name: "user_id" })
+  userId!: number;
+
+  @Column({ name: "first_name", type: "varchar", length: 100 })
+  firstName!: string;
+
+  @Column({ name: "last_name", type: "varchar", length: 100 })
+  lastName!: string;
+
+  @Column({ name: "email", type: "varchar", length: 255, unique: true })
+  email!: string;
+
+  @Column({ name: "password", type: "varchar", length: 255 })
+  password!: string;
+}
