@@ -38,11 +38,12 @@ export default function SignInPage() {
     }
     setLoading(true);
 
-    setTimeout(() => {
+    setTimeout(async () => {
     //const foundUser = login(email, password);
     const loginDetails:LoginRequest = {email: email, password: password};
-    const foundUser = validateUser(loginDetails);
-    console.log("user: ", foundUser);
+    const response = await userApi.getUser(loginDetails);
+    console.log("user: ", response);
+    const foundUser = response.user;
     setLoading(false);
     if (foundUser) {
       // Successful login logic
@@ -64,11 +65,6 @@ export default function SignInPage() {
     }
   }, 800);
   };
-
-  const validateUser = async (loginDetails:LoginRequest) => {
-    const foundUser = await userApi.getUser(loginDetails);
-    return foundUser;
-  }
  
   return (
     <>

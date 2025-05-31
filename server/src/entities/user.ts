@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
-@Entity({ name: "user" }) // Use the actual table name
+@Entity({ name: "users" }) // Use the actual table name
 export class User {
   @PrimaryGeneratedColumn({ name: "user_id" })
   userId!: number;
@@ -16,4 +16,7 @@ export class User {
 
   @Column({ name: "password", type: "varchar", length: 255 })
   password!: string;
+
+  @Column({ name: "role", type: "varchar", length: 255 })
+  role!: string;
 }

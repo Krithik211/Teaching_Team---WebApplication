@@ -10,6 +10,7 @@ export interface User {
   lastName: string;
   email: string;
   password: string;
+  role: string;
 }
 
 export interface LoginRequest {
@@ -17,9 +18,14 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface LoginResponse {
+  message: string;
+  user?: User;
+}
+
 export const userApi = {
 
-  getUser: async (user: LoginRequest) => {
+  getUser: async (user: LoginRequest): Promise<LoginResponse> => {
     const response = await api.post("/login", user);
     return response.data;
   },

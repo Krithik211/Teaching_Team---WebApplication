@@ -1,154 +1,33 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
-import { Tutorial } from "../entity/Tutorial";
+import { User } from "../entities/User";
+import bcrypt from "bcryptjs";
 
-export class TutorialController {
-  private tutorialRepository = AppDataSource.getRepository(Tutorial);
+export const loginUser= async (req: Request, res: Response): Promise<any> => {
+  console.log('Request:', req.body);
+  const { email, password } = req.body;
 
-  /**
-   * Retrieves all tutorials from the database
-   * @param request - Express request object
-   * @param response - Express response object
-   * @returns JSON response containing an array of all tutorials
-   */
-  async all(request: Request, response: Response) {
-    const tutorials = await this.tutorialRepository.find();
-    return response.json(tutorials);
+  if (!email || !password) {
+    return res.json({ message: "Email and password are required." });
   }
 
-  /**
-   * Retrieves a single tutorial by its ID
-   * @param request - Express request object containing the tutorial ID in params
-   * @param response - Express response object
-   * @returns JSON response containing the tutorial if found, or 404 error if not found
-   */
-  async one(request: Request, response: Response) {
-    const id = parseInt(request.params.id);
-    const tutorial = await this.tutorialRepository.findOne({
-      where: { id },
-    });
+  try {
+    const userRepo = AppDataSource.getRepository(User);
+    const user = await userRepo.findOneBy({ email });
 
-    if (!tutorial) {
-      return response.status(404).json({ message: "Tutorial not found" });
-    }
-    return response.json(tutorial);
-  }
-
-  /**
-   * Creates a new tutorial in the database
-   * @param request - Express request object containing tutorial details in body
-   * @param response - Express response object
-   * @returns JSON response containing the created tutorial or error message
-   */
-  async save(request: Request, response: Response) {
-    const { title, description, content, difficulty, author } = request.body;
-
-    const tutorial = Object.assign(new Tutorial(), {
-      title,
-      description,
-      content,
-      difficulty,
-      author,
-    });
-
-    try {
-      const savedTutorial = await this.tutorialRepository.save(tutorial);
-      return response.status(201).json(savedTutorial);
-    } catch (error) {
-      return response
-        .status(400)
-        .json({ message: "Error creating tutorial", error });
-    }
-  }
-
-  /**
-   * Deletes a tutorial from the database by its ID
-   * @param request - Express request object containing the tutorial ID in params
-   * @param response - Express response object
-   * @returns JSON response with success message or 404 error if tutorial not found
-   */
-  async remove(request: Request, response: Response) {
-    const id = parseInt(request.params.id);
-    const tutorialToRemove = await this.tutorialRepository.findOne({
-      where: { id },
-    });
-
-    if (!tutorialToRemove) {
-      return response.status(404).json({ message: "Tutorial not found" });
+    if (!user) {
+      return res.json({ message: "Invalid email or password.", user: null });
     }
 
-    await this.tutorialRepository.remove(tutorialToRemove);
-    return response.json({ message: "Tutorial removed successfully" });
-  }
-
-  /**
-   * Updates an existing tutorial's information
-   * @param request - Express request object containing tutorial ID in params and updated details in body
-   * @param response - Express response object
-   * @returns JSON response containing the updated tutorial or error message
-   */
-  async update(request: Request, response: Response) {
-    const id = parseInt(request.params.id);
-    const { title, description, content, difficulty, author } = request.body;
-
-    let tutorialToUpdate = await this.tutorialRepository.findOne({
-      where: { id },
-    });
-
-    if (!tutorialToUpdate) {
-      return response.status(404).json({ message: "Tutorial not found" });
+    // const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = (password == user.password)? true : false;
+    if (!isMatch) {
+      return res.json({ message: "Invalid email or password.", user: null });
     }
 
-    tutorialToUpdate = Object.assign(tutorialToUpdate, {
-      title,
-      description,
-      content,
-      difficulty,
-      author,
-    });
-
-    try {
-      const updatedTutorial = await this.tutorialRepository.save(
-        tutorialToUpdate
-      );
-      return response.json(updatedTutorial);
-    } catch (error) {
-      return response
-        .status(400)
-        .json({ message: "Error updating tutorial", error });
-    }
+    return res.json({ message: "Login successful", user: user });
+  } catch (error) {
+    console.error("Login error:", error);
+    return res.status(500).json({ message: "Server error" });
   }
-
-  /**
-   * Deletes all tutorials from the database
-   * @param request - Express request object
-   * @param response - Express response object
-   * @returns JSON response with success message
-   */
-  async removeAll(request: Request, response: Response) {
-    await this.tutorialRepository.clear();
-    return response.json({ message: "All tutorials removed successfully" });
-  }
-
-  /**
-   * Searches for tutorials by title
-   * @param request - Express request object containing the title query parameter
-   * @param response - Express response object
-   * @returns JSON response containing an array of matching tutorials
-   */
-  async findByTitle(request: Request, response: Response) {
-    const title = request.query.title as string;
-    if (!title) {
-      return response
-        .status(400)
-        .json({ message: "Title query parameter is required" });
-    }
-
-    const tutorials = await this.tutorialRepository
-      .createQueryBuilder("tutorial")
-      .where("tutorial.title LIKE :title", { title: `%${title}%` })
-      .getMany();
-
-    return response.json(tutorials);
-  }
-}
+};
