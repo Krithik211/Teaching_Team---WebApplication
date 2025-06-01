@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
-import { User } from "../entities/User";
+import { User } from "../entities/user";
 import bcrypt from "bcryptjs";
 
 export const loginUser= async (req: Request, res: Response): Promise<any> => {
