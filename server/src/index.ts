@@ -1,34 +1,24 @@
 import "reflect-metadata";
 import express from "express";
-import { DataSource } from "typeorm";
+import { AppDataSource } from "./data-source";
 import dotenv from "dotenv";
+import cors from "cors";
+import authRoutes from './routes/authRoutes';
 
 dotenv.config();
-
+const PORT = process.env.PORT || 3002;
 const app = express();
+app.use(cors());
 app.use(express.json());
-
-const AppDataSource = new DataSource({
-  type: "mysql",
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT),
-  username: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  synchronize: true,
-  entities: [__dirname + "/entities/*.ts"],
-});
 
 AppDataSource.initialize()
   .then(() => {
-    console.log("Connected to MySQL");
-    app.get("/", (req, res) => {
-  res.send("Backend is running and connected to MySQL!");
-});
-    app.listen(4000, () => {
-      console.log("Server is running on http://localhost:4000");
+    console.log("Data Source has been initialized!");
+    app.use("/api", authRoutes);
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
     });
   })
-  .catch((err) => {
-    console.error("Database connection error:", err);
-  });
+  .catch((error) =>
+    console.log("Error during Data Source initialization:", error)
+  );

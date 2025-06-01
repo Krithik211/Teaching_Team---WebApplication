@@ -11,6 +11,7 @@ import { toast, ToastContainer } from "react-toastify";
 import ReCAPTCHA from "react-google-recaptcha";
 import 'react-toastify/dist/ReactToastify.css';
 import BackButton from "@/components/BackButton";
+import { userApi, LoginRequest } from "@/services/api";
  
 export default function SignInPage() {
   const [email, setEmail] = useState("");
@@ -37,8 +38,12 @@ export default function SignInPage() {
     }
     setLoading(true);
 
-    setTimeout(() => {
-    const foundUser = login(email, password);
+    setTimeout(async () => {
+    //const foundUser = login(email, password);
+    const loginDetails:LoginRequest = {email: email, password: password};
+    const response = await userApi.getUser(loginDetails);
+    console.log("user: ", response);
+    const foundUser = response.user;
     setLoading(false);
     if (foundUser) {
       // Successful login logic
