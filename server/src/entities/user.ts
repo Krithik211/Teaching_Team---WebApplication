@@ -19,4 +19,8 @@ export class User {
 
   @Column({ name: "role", type: "varchar", length: 255 })
   role!: string;
+  
+  @Column({ name: "avatar_url", type: "varchar", length: 255, nullable: true })
+avatarUrl?: string;
+
 }
