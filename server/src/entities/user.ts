@@ -20,6 +20,10 @@ export class User {
 
   @Column({ name: "role", type: "varchar", length: 255 })
   role!: string;
+
+  @Column({ name: "date_joined", type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  dateJoined!: Date;
+
   
   // @Column({ name: "avatar_url", type: "varchar", length: 255, nullable: true })
   // avatarUrl?: string;

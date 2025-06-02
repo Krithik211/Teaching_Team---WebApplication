@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { User } from "@/types/User";
 import { Avatar } from "@/types/Avatar";
 import { userApi } from "@/services/api";
+import Navigation from "@/components/Navigation";
 
 const EditProfilePage = () => {
   const router = useRouter();
@@ -68,12 +69,13 @@ const EditProfilePage = () => {
   return (
     <>
       <Head>
-        <title>Edit Profile - Teaching Team</title>
+        <title>User Profile - Teaching Team</title>
       </Head>
-
+      <Navigation showHome={true} />
+      <div className="pt-24"> {/* Pushes content below fixed navbar */}
       <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
         <div className="bg-white p-6 rounded shadow-md w-full max-w-xl">
-          <h2 className="text-2xl font-bold mb-6 text-center">Edit Profile</h2>
+          <h2 className="text-2xl font-bold mb-6 text-center">User Profile</h2>
           <form onSubmit={handleUpdate} className="space-y-4">
             <input
               value={firstName}
@@ -147,6 +149,7 @@ const EditProfilePage = () => {
           </form>
         </div>
       </div>
+    </div>
     </>
   );
 };

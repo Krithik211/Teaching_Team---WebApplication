@@ -12,6 +12,8 @@ import ReCAPTCHA from "react-google-recaptcha";
 import 'react-toastify/dist/ReactToastify.css';
 import BackButton from "@/components/BackButton";
 import { userApi, LoginRequest } from "@/services/api";
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
  
 export default function SignInPage() {
   const [email, setEmail] = useState("");
@@ -71,9 +73,8 @@ export default function SignInPage() {
         <title>Login - Teaching Team</title>
         <meta name="description" content="Login to the Teaching Team" />
       </Head>
-      <div className="absolute top-10 left-10 z-50">
-        <BackButton to="/" label="Home" />
-      </div>
+      <Navigation showHome={true} />
+      <div className="pt-24"> {/* Pushes content below fixed navbar */}
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 font-poppins px-4">
         <h1 className="text-3xl font-bold text-gray-800 text-center mb-15">Teaching Team</h1>
         {error && (
@@ -174,6 +175,8 @@ export default function SignInPage() {
           </div>
         </div>
       </div>
+    </div>
+    <Footer />
       <ToastContainer position="top-right" autoClose={1000} />
     </>
   );
