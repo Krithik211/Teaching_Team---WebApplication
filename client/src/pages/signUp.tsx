@@ -8,6 +8,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import { userApi } from "@/services/api";
 import { User } from "@/types/User";
 import { Avatar } from "@/types/Avatar";
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
+
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -116,14 +119,19 @@ useEffect(() => {
       <Head>
         <title>Sign Up - Teaching Team</title>
       </Head>
+      <Navigation showHome={true} />
+      <div className="pt-24"> {/* Pushes content below fixed navbar */}
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 font-poppins px-4 sm:px-6 lg:px-8">
 
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 font-poppins px-4">
         <div className="bg-white p-8 rounded shadow-lg w-full max-w-md">
           <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">Create Account</h1>
 
           {error && <p className="text-red-600 text-center mb-4">{error}</p>}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            <label className="block text-sm font-medium text-gray-700">First Name {formErrors.firstName && (
+    <span className="text-red-500 text-xs ml-2">({formErrors.firstName})</span>
+  )} </label>
             <input
               type="text"
               placeholder="First Name"
@@ -131,7 +139,9 @@ useEffect(() => {
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
             />
-            {formErrors.firstName && <p className="text-red-600 text-sm">{formErrors.firstName}</p>}
+            <label className="block text-sm font-medium text-gray-700">Last Name {formErrors.lastName && (
+    <span className="text-red-500 text-xs ml-2">({formErrors.lastName})</span>
+  )} </label>
             <input
               type="text"
               placeholder="Last Name"
@@ -139,7 +149,9 @@ useEffect(() => {
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
             />
-            {formErrors.lastName && <p className="text-red-600 text-sm">{formErrors.lastName}</p>}
+            <label className="block text-sm font-medium text-gray-700">Email {formErrors.email && (
+    <span className="text-red-500 text-xs ml-2">({formErrors.email})</span>
+  )} </label>
             <input
               type="email"
               placeholder="Email Address"
@@ -147,7 +159,8 @@ useEffect(() => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            {formErrors.email && <p className="text-red-600 text-sm">{formErrors.email}</p>}
+            
+            <label className="block text-sm font-medium text-gray-700">Select Role</label>
             <select
               className="form-input w-full border px-4 py-2 rounded text-gray-800"
               value={role}
@@ -156,6 +169,9 @@ useEffect(() => {
               <option value="tutor">Tutor</option>
               <option value="lecturer">Lecturer</option>
             </select>
+            <label className="block text-sm font-medium text-gray-700">Password {formErrors.password && (
+    <span className="text-red-500 text-xs ml-2">({formErrors.password})</span>
+  )} </label>
             <input
               type="password"
               placeholder="Password"
@@ -163,7 +179,9 @@ useEffect(() => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            {formErrors.password && <p className="text-red-600 text-sm">{formErrors.password}</p>}
+            <label className="block text-sm font-medium text-gray-700">Confirm Password {formErrors.confirmPassword && (
+    <span className="text-red-500 text-xs ml-2">({formErrors.confirmPassword})</span>
+  )} </label>
             <input
               type="password"
               placeholder="Confirm Password"
@@ -171,10 +189,9 @@ useEffect(() => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
-            {formErrors.confirmPassword && <p className="text-red-600 text-sm">{formErrors.confirmPassword}</p>}
 
             <div>
-          <p className="text-sm text-gray-700 font-poppins font-bold mb-2">Choose an Avatar:</p>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Choose an Avatar</label>
   <div className="grid grid-cols-4 gap-2">
     {avatars?.map((av) => (
       <img
@@ -182,8 +199,9 @@ useEffect(() => {
         src={av.avatarUrl}
         onClick={() => setSelectedAvatar(av)}
         className={`cursor-pointer border-2 rounded-full w-20 h-20 object-cover ${
-          selectedAvatar?.avatarUrl === av.avatarUrl ? "border-blue-500" : "border-transparent"
-        }`}
+          selectedAvatar?.avatarUrl === av.avatarUrl 
+  ? "border-4 border-indigo-500 scale-105" 
+  : "border-gray-300"}`}
         alt="Avatar option"
       />
     ))}
@@ -193,11 +211,10 @@ useEffect(() => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full font-semibold py-2 rounded transition ${
-                loading
-                  ? "bg-gray-400 text-white cursor-not-allowed"
-                  : "bg-indigo-900 text-white hover:bg-indigo-800"
+              className={`w-full py-2 font-semibold rounded-lg shadow-md text-white transition-all duration-200 ${
+              loading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-800 hover:bg-indigo-700"
               }`}
+
             >
               {loading ? "Registering..." : "Register"}
             </button>
@@ -209,7 +226,10 @@ useEffect(() => {
           </p>
         </div>
       </div>
-      <ToastContainer />
+    </div>
+       {/* Footer */}
+  <Footer />
+  <ToastContainer />
     </>
   );
 }
