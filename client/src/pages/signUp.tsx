@@ -1,10 +1,13 @@
 import Head from "next/head";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import { userApi } from "@/services/api";
+import { User } from "@/types/User";
+import { Avatar } from "@/types/Avatar";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -18,13 +21,24 @@ export default function SignUpPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const avatars = [
-  "https://mighty.tools/mockmind-api/content/cartoon/11.jpg",
-  "https://mighty.tools/mockmind-api/content/cartoon/32.jpg",
-  "https://mighty.tools/mockmind-api/content/cartoon/5.jpg",
-  "https://mighty.tools/mockmind-api/content/cartoon/7.jpg",
-];
-const [avatarUrl, setAvatarUrl] = useState(avatars[0]);
+//   const avatars = [
+//   "https://mighty.tools/mockmind-api/content/cartoon/11.jpg",
+//   "https://mighty.tools/mockmind-api/content/cartoon/32.jpg",
+//   "https://mighty.tools/mockmind-api/content/cartoon/5.jpg",
+//   "https://mighty.tools/mockmind-api/content/cartoon/7.jpg",
+// ];
+const [avatars, setAvatars] = useState<Avatar[] | null>(null);
+const [selectedAvatar, setSelectedAvatar] = useState<Avatar | null>(null);
+
+useEffect(() => {
+  const fetchData = async () => {
+  const response = await userApi.getAvatar();
+  const avatars = response.avatars;
+  console.log('Avatars', avatars);
+  setAvatars(avatars);
+  }
+  fetchData();
+}, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -61,14 +75,23 @@ const [avatarUrl, setAvatarUrl] = useState(avatars[0]);
   setLoading(true);
 
   try {
-    const response = await axios.post("http://localhost:3001/api/register", {
-      firstName,
-      lastName,
-      email,
-      password,
-      role,
-      avatarUrl,
-    });
+    // const response = await axios.post("http://localhost:3001/api/register", {
+    //   firstName,
+    //   lastName,
+    //   email,
+    //   password,
+    //   role,
+    //   avatarUrl,
+    // });
+    const user = {
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      password: password,
+      role: role,
+      avatar_id: selectedAvatar ? selectedAvatar.avatarId : 0,
+    }
+    const response = await userApi.createUser(user);
 
     if (response.data.user) {
       toast.success("Registration successful!");
@@ -153,13 +176,13 @@ const [avatarUrl, setAvatarUrl] = useState(avatars[0]);
             <div>
           <p className="text-sm text-gray-700 font-poppins font-bold mb-2">Choose an Avatar:</p>
   <div className="grid grid-cols-4 gap-2">
-    {avatars.map((url) => (
+    {avatars?.map((av) => (
       <img
-        key={url}
-        src={url}
-        onClick={() => setAvatarUrl(url)}
+        key={av.avatarId}
+        src={av.avatarUrl}
+        onClick={() => setSelectedAvatar(av)}
         className={`cursor-pointer border-2 rounded-full w-20 h-20 object-cover ${
-          avatarUrl === url ? "border-blue-500" : "border-transparent"
+          selectedAvatar?.avatarUrl === av.avatarUrl ? "border-blue-500" : "border-transparent"
         }`}
         alt="Avatar option"
       />

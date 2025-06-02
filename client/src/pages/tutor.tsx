@@ -11,7 +11,7 @@ import Footer from "@/components/Footer";
 
 export default function TutorDashboard() {
   // Restrict access to tutors only
-  //useProtectedRoute("tutor");
+  useProtectedRoute("tutor");
 
   return (
     <>

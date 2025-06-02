@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { User } from "./entities/user";
 import dotenv from "dotenv";
+import { Avatar } from "./entities/avatar";
 
 dotenv.config();
 
@@ -14,7 +15,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME,
   synchronize: true,
   logging: false,
-  entities: [User],
+  entities: [User, Avatar],
   migrations: [],
   subscribers: [],
 });

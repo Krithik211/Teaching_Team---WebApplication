@@ -15,7 +15,7 @@ export function useProtectedRoute(expectedRole: "tutor" | "lecturer") {
       router.push("/");
       return;
     }
-
+    console.log('current user:', currentUser);
     // Redirect to appropriate page if role doesn't match
     if (currentUser.role !== expectedRole) {
       if (currentUser.role === "lecturer")

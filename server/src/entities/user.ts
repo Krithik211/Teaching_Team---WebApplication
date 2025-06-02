@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
+import { Avatar } from "./avatar";
 
 @Entity({ name: "users" }) // Use the actual table name
 export class User {
@@ -20,7 +21,10 @@ export class User {
   @Column({ name: "role", type: "varchar", length: 255 })
   role!: string;
   
-  @Column({ name: "avatar_url", type: "varchar", length: 255, nullable: true })
-avatarUrl?: string;
+  // @Column({ name: "avatar_url", type: "varchar", length: 255, nullable: true })
+  // avatarUrl?: string;
+  @ManyToOne(() => Avatar)
+  @JoinColumn({ name: "avatar_id" })
+  avatar!: Avatar;
 
 }

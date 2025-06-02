@@ -4,7 +4,8 @@
 import React from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/router"; 
+import { useRouter } from "next/router";
+import ProfileMenu from "./ProfileMenu";
 
 interface NavigationProps {
   showSignOut?: boolean;
@@ -25,7 +26,7 @@ const Navigation: React.FC<NavigationProps> = ({ showSignOut = false, showHome =
   return (
     <nav className="bg-gray-800 text-white p-4 fixed top-0 w-full z-50 shadow-md">
       <div className="flex justify-between items-center">
-        
+
         {/* Logo and title (left side) */}
         <div className="flex items-center space-x-3">
           <img src="/images/logo3.png" alt="Logo" className="h-12 w-12 object-contain bg-gray-800 rounded" />
@@ -54,12 +55,15 @@ const Navigation: React.FC<NavigationProps> = ({ showSignOut = false, showHome =
           )}
 
           {(showSignOut && !showHome) && (
-            <button
-              onClick={handleSignOut}
-              className="bg-white text-gray-800 px-3 py-1 rounded-full hover:bg-gray-300 font-medium"
-            >
-              Sign Out
-            </button>
+            <div className="flex items-center space-x-4">
+              <ProfileMenu />
+              <button
+                onClick={handleSignOut}
+                className="bg-white text-gray-800 px-3 py-1 rounded-full hover:bg-gray-300 font-medium"
+              >
+                Sign Out
+              </button>
+            </div>
           )}
 
           {(showHome) && (

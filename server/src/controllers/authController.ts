@@ -10,7 +10,7 @@ interface RegisterInput {
   email: string;
   password: string;
   role: string;
-  avatarUrl?: string;
+  avatar_id?: number;
 }
 
 // ------------------- REGISTER -------------------
@@ -19,7 +19,7 @@ export const registerUser = async (
   req: Request<{}, {}, RegisterInput>,
   res: Response
 ): Promise<any> => {
-  const { firstName, lastName, email, password, role, avatarUrl } = req.body;
+  const { firstName, lastName, email, password, role, avatar_id } = req.body;
 
   if (!firstName || !lastName || !email || !password || !role) {
     return res.status(400).json({ message: "All fields are required.", user: null });
@@ -41,9 +41,9 @@ export const registerUser = async (
       email,
       password: hashedPassword,
       role,
-      avatarUrl,
+      avatar: { avatarId: avatar_id },
     });
-    
+
 
     const savedUser = await userRepo.save(newUser);
 
@@ -69,7 +69,10 @@ export const loginUser = async (
 
   try {
     const userRepo = AppDataSource.getRepository(User);
-    const user = await userRepo.findOneBy({ email });
+    const user = await userRepo.findOne({
+      where: { email },
+      relations: { avatar: true }
+    });
 
     if (!user) {
       return res.json({ message: "Invalid email or password.", user: null });
@@ -77,13 +80,13 @@ export const loginUser = async (
 
     let isMatch = false;
 
-// Check if the stored password is hashed (starts with bcrypt hash prefix)
-if (user.password.startsWith("$2a$") || user.password.startsWith("$2b$") || user.password.startsWith("$2y$")) {
-  isMatch = await bcrypt.compare(password, user.password);
-} else {
-  // Plain text fallback (old users)
-  isMatch = password === user.password;
-}
+    // Check if the stored password is hashed (starts with bcrypt hash prefix)
+    if (user.password.startsWith("$2a$") || user.password.startsWith("$2b$") || user.password.startsWith("$2y$")) {
+      isMatch = await bcrypt.compare(password, user.password);
+    } else {
+      // Plain text fallback (old users)
+      isMatch = password === user.password;
+    }
 
 
     return res.json({ message: "Login successful", user: user });

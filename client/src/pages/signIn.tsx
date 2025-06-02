@@ -20,7 +20,7 @@ export default function SignInPage() {
   const [captchaValue, setCaptchaValue] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { setCurrentUser } = useAuth();
   const router = useRouter();
  
   const handleCaptchaChange = (value: string | null) => {
@@ -37,9 +37,7 @@ export default function SignInPage() {
       return;
     }
     setLoading(true);
-
     setTimeout(async () => {
-    //const foundUser = login(email, password);
     const loginDetails:LoginRequest = {email: email, password: password};
     const response = await userApi.getUser(loginDetails);
     console.log("user: ", response);
@@ -47,8 +45,9 @@ export default function SignInPage() {
     setLoading(false);
     if (foundUser) {
       // Successful login logic
-      toast.success("Login successful!");
- 
+      toast.success("Welcome," + foundUser.firstName + " " + foundUser.lastName);
+      localStorage.setItem("CurrentUser", JSON.stringify(foundUser));
+      setCurrentUser(foundUser);
       // Redirect based on user role.
       setTimeout(() => {
         if (foundUser.role === "lecturer") {
