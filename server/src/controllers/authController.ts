@@ -10,7 +10,7 @@ interface RegisterInput {
   email: string;
   password: string;
   role: string;
-  avatar_id?: number;
+  avatar_id: number;
 }
 
 // ------------------- REGISTER -------------------
@@ -20,12 +20,14 @@ export const registerUser = async (
   res: Response
 ): Promise<any> => {
   const { firstName, lastName, email, password, role, avatar_id } = req.body;
-
+  console.log('backend', req.body)
   if (!firstName || !lastName || !email || !password || !role) {
+    console.log('Empty fields')
     return res.status(400).json({ message: "All fields are required.", user: null });
   }
 
   try {
+    console.log('New user backend')
     const userRepo = AppDataSource.getRepository(User);
 
     const existingUser = await userRepo.findOneBy({ email });
@@ -44,9 +46,9 @@ export const registerUser = async (
       avatar: { avatarId: avatar_id },
     });
 
-
+    console.log('new user', newUser);
     const savedUser = await userRepo.save(newUser);
-
+    console.log('saved user', savedUser);
     return res.status(201).json({ message: "User registered successfully", user: savedUser });
   } catch (error) {
     console.error("Registration error:", error);

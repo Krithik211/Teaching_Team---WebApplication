@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "@/context/AuthContext";
 
-export function useProtectedRoute(expectedRole: "tutor" | "lecturer") {
+export function useProtectedRoute(expectedRole: "candidate" | "lecturer") {
   const { currentUser } = useAuth();
   const router = useRouter();
 
@@ -20,7 +20,7 @@ export function useProtectedRoute(expectedRole: "tutor" | "lecturer") {
     if (currentUser.role !== expectedRole) {
       if (currentUser.role === "lecturer")
         router.push("/lecturer");
-      else if (currentUser.role === "tutor")
+      else if (currentUser.role === "candidate")
         router.push("/tutor");
       else
         router.push("/");

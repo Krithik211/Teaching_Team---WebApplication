@@ -1,5 +1,5 @@
 import axios from "axios";
-import { User } from "@/types/User";
+import { RegisterRequest, User } from "@/types/User";
 import { Avatar } from "@/types/Avatar";
 
 export const api = axios.create({
@@ -32,8 +32,10 @@ export const userApi = {
     return response.data;
   },
 
-  createUser: async (user: User) => {
+  createUser: async (user: RegisterRequest) => {
+    console.log('API request is going...', user)
     const response = await api.post("/auth/register", user);
+    console.log('API Response', response)
     return response.data;
   },
 
