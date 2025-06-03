@@ -1,6 +1,5 @@
 import axios from "axios";
 import { RegisterRequest, User } from "@/types/User";
-import { Avatar } from "@/types/Avatar";
 
 export const api = axios.create({
   baseURL: "http://localhost:3001/api", // Adjust this to match your backend URL
@@ -44,10 +43,11 @@ export const userApi = {
     return response.data;
   },
 
-  updateTutorial: async (id: number, user: Partial<User>) => {
-    const response = await api.put(`/tutorials/${id}`, user);
-    return response.data;
-  },
+  updateUser: async (userId: number, user: Partial<User>) => {
+  console.log("➡️ Calling updateUser API", userId, user);
+  const response = await api.put(`/auth/user/update/${userId}`, user);
+  return response.data;
+},
 
   deleteTutorial: async (id: number) => {
     const response = await api.delete(`/tutorials/${id}`);

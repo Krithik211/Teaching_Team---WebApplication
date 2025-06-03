@@ -6,12 +6,16 @@ import { User } from "@/types/User";
 import { Avatar } from "@/types/Avatar";
 import { userApi } from "@/services/api";
 import Navigation from "@/components/Navigation";
+import { UpdateUserRequest } from "@/types/User";
+
+
 
 const EditProfilePage = () => {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [avatars, setAvatars] = useState<Avatar[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   // Form fields
   const [firstName, setFirstName] = useState("");
@@ -43,22 +47,52 @@ const EditProfilePage = () => {
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
+     console.log("Update form submitted"); // ✅ Add this
+
+     // ✅ Place this right below it:
+  console.log("📦 Payload to update:", {
+    firstName,
+    lastName,
+    email,
+    role,
+    avatarId: selectedAvatar?.avatarId,
+    password,
+  });
+
     setLoading(true);
 
     try {
-    //   const updatedUser: Partial<User> = {
-    //     firstName,
-    //     lastName,
-    //     email,
-    //     password: password || undefined, // optional
-    //     role,
-    //     avatar_id: selectedAvatar?.avatarId,
-    //   };
+     if (!selectedAvatar) {
+  toast.error("Please select an avatar.");
+  setLoading(false);
+  return;
+} 
+    const updatedUser: UpdateUserRequest = {
+  firstName,
+  lastName,
+  email,
+  role,
+  avatar_id: selectedAvatar?.avatarId!,
+};
 
-    //   const response = await userApi.updateUser(user?.userId!, updatedUser);
-    //   toast.success("Profile updated!");
-    //   localStorage.setItem("CurrentUser", JSON.stringify(response.user));
-      router.push("/dashboard");
+if (password.trim() !== "") {
+  updatedUser.password = password;
+}
+
+const response = await userApi.updateUser(user!.userId, updatedUser);
+
+toast.success("Profile updated!");
+localStorage.setItem("CurrentUser", JSON.stringify(response.user));
+setUser(response.user);
+setIsEditing(false);
+
+      if (response.user.role === "lecturer") {
+  router.push("/lecturer");
+} else if (response.user.role === "tutor" || response.user.role === "candidate") {
+  router.push("/tutor");
+} else {
+  router.push("/"); // fallback
+}
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Update failed.");
     } finally {
@@ -71,82 +105,130 @@ const EditProfilePage = () => {
       <Head>
         <title>User Profile - Teaching Team</title>
       </Head>
-      <Navigation showHome={true} />
+      <Navigation showBackButton={true} />
       <div className="pt-24"> {/* Pushes content below fixed navbar */}
       <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
         <div className="bg-white p-6 rounded shadow-md w-full max-w-xl">
-          <h2 className="text-2xl font-bold mb-6 text-center">User Profile</h2>
+          <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">User Profile</h2>
           <form onSubmit={handleUpdate} className="space-y-4">
-            <input
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              placeholder="First Name"
-              className="w-full border px-4 py-2 rounded"
-              required
-            />
-            <input
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              placeholder="Last Name"
-              className="w-full border px-4 py-2 rounded"
-              required
-            />
-            <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
-              type="email"
-              className="w-full border px-4 py-2 rounded"
-              required
-            />
-            <input
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="New Password (leave blank to keep current)"
-              type="password"
-              className="w-full border px-4 py-2 rounded"
-            />
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full border px-4 py-2 rounded"
-            >
-              <option value="tutor">Tutor</option>
-              <option value="lecturer">Lecturer</option>
-              <option value="admin">Admin</option>
-            </select>
+            {/* First Name */}
+  <label className="block text-sm font-medium text-gray-700">
+    First Name
+    <input
+      value={firstName}
+      onChange={(e) => setFirstName(e.target.value)}
+      disabled={!isEditing}
+      required={isEditing}
+      placeholder="First Name"
+      className={`w-full mt-1 border px-4 py-2 rounded text-gray-800 ${
+        !isEditing ? "bg-gray-100 cursor-not-allowed" : "focus:ring-2 focus:ring-indigo-500"
+      }`}
+    />
+  </label>
+            {/* Last Name */}
+  <label className="block text-sm font-medium text-gray-700">
+    Last Name
+    <input
+      value={lastName}
+      onChange={(e) => setLastName(e.target.value)}
+      disabled={!isEditing}
+      required={isEditing}
+      placeholder="Last Name"
+      className={`w-full mt-1 border px-4 py-2 rounded text-gray-800 ${
+        !isEditing ? "bg-gray-100 cursor-not-allowed" : "focus:ring-2 focus:ring-indigo-500"
+      }`}
+    />
+  </label>
+           <label className="block text-sm font-medium text-gray-700">
+  Email
+  <input
+    type="email"
+    value={email}
+    onChange={(e) => setEmail(e.target.value)}
+    disabled={!isEditing}
+    required={isEditing}
+    placeholder="Email"
+    className={`w-full mt-1 border px-4 py-2 rounded text-gray-800 ${
+      !isEditing ? "bg-gray-100 cursor-not-allowed" : "focus:ring-2 focus:ring-indigo-500"
+    }`}
+  />
+</label>
+           {/* Password */}
+  <label className="block text-sm font-medium text-gray-700">
+    New Password
+    <input
+      type="password"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      disabled={!isEditing}
+      placeholder="Leave blank to keep current"
+      className={`w-full mt-1 border px-4 py-2 rounded text-gray-800 ${
+        !isEditing ? "bg-gray-100 cursor-not-allowed" : "focus:ring-2 focus:ring-indigo-500"
+      }`}
+    />
+  </label>
+            {/* Role */}
+  <label className="block text-sm font-medium text-gray-700">
+    Role
+    <select
+      value={role}
+      onChange={(e) => setRole(e.target.value)}
+      disabled={!isEditing}
+      className={`w-full mt-1 border px-4 py-2 rounded text-gray-800 ${
+        !isEditing ? "bg-gray-100 cursor-not-allowed" : "focus:ring-2 focus:ring-indigo-500"
+      }`}
+    >
+      <option value="tutor">Tutor</option>
+      <option value="lecturer">Lecturer</option>
+      <option value="admin">Admin</option>
+    </select>
+  </label>
 
             <div>
-              <p className="text-sm font-medium mb-2">Choose Avatar</p>
-              <div className="grid grid-cols-4 gap-2">
-                {avatars.map((av) => (
-                  <img
-                    key={av.avatarId}
-                    src={av.avatarUrl}
-                    onClick={() => setSelectedAvatar(av)}
-                    className={`cursor-pointer border-2 rounded-full w-20 h-20 object-cover ${
-                      selectedAvatar?.avatarId === av.avatarId
-                        ? "border-blue-500"
-                        : "border-transparent"
-                    }`}
-                    alt="Avatar"
-                  />
-                ))}
-              </div>
-            </div>
+    <p className="text-sm font-medium text-gray-700 mb-1">Choose Avatar</p>
+    <div className="grid grid-cols-4 gap-3 mb-4">
+      {avatars.map((av) => (
+        <img
+          key={av.avatarId}
+          src={av.avatarUrl}
+          onClick={() => isEditing && setSelectedAvatar(av)}
+          className={`cursor-pointer border-2 rounded-full w-20 h-20 object-cover transition-transform duration-150 ease-in-out ${
+            selectedAvatar?.avatarId === av.avatarId
+              ? "border-indigo-500 scale-105 shadow-md"
+              : "border-gray-300 opacity-60"
+          } ${!isEditing ? "cursor-not-allowed opacity-50" : ""}`}
+          alt="Avatar"
+        />
+      ))}
+    </div>
+  </div>
+   {isEditing && (
+    <div className="w-full text-center pt-4">
+      <button
+        type="submit"
+        disabled={loading}
+        className={`w-full py-2 font-semibold rounded text-white ${
+          loading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-700 hover:bg-indigo-600"
+        }`}
+      >
+        {loading ? "Saving..." : "Save Changes"}
+      </button>
+    </div>
+  )}
+</form>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full py-2 font-semibold rounded ${
-                loading
-                  ? "bg-gray-400 text-white"
-                  : "bg-indigo-700 text-white hover:bg-indigo-600"
-              }`}
-            >
-              {loading ? "Updating..." : "Update Profile"}
-            </button>
-          </form>
+{/* Edit button shown only when not editing */}
+{!isEditing && (
+  <div className="w-full text-center pt-4">
+    <button
+      type="button"
+      onClick={() => setIsEditing(true)}
+      className="text-indigo-700 font-semibold hover:underline"
+    >
+      Edit Profile
+    </button>
+  </div>
+)}
         </div>
       </div>
     </div>
