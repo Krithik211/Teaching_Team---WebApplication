@@ -67,6 +67,11 @@ useEffect(() => {
   } else if (password !== confirmPassword) {
     newErrors.confirmPassword = "Passwords do not match.";
   }
+  
+  if (!selectedAvatar) {
+  newErrors.avatar = "Please choose an avatar.";
+}
+
 
   if (Object.keys(newErrors).length > 0) {
     setFormErrors(newErrors);

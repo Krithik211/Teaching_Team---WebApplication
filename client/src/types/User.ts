@@ -22,3 +22,11 @@ export interface RegisterRequest {
   avatar_id: number | null;
 }
   
+export interface UpdateUserRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password?: string;
+  role: string;
+  avatar_id: number;
+}
