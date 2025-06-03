@@ -120,9 +120,8 @@ useEffect(() => {
         <title>Sign Up - Teaching Team</title>
       </Head>
       <Navigation showHome={true} />
-      <div className="pt-24"> {/* Pushes content below fixed navbar */}
+      <div className="pt-28 bg-gray-100 " > {/* Pushes content below fixed navbar */}
       <div className="min-h-screen flex items-center justify-center bg-gray-100 font-poppins px-4 sm:px-6 lg:px-8">
-
         <div className="bg-white p-8 rounded shadow-lg w-full max-w-md">
           <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">Create Account</h1>
 
@@ -191,7 +190,13 @@ useEffect(() => {
             />
 
             <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Choose an Avatar</label>
+  <label className="block text-sm font-medium text-gray-700 mb-1">
+    Choose an Avatar{" "}
+    {formErrors.avatar && (
+      <span className="text-red-500 text-xs ml-2">({formErrors.avatar})</span>
+    )}
+  </label>
+
   <div className="grid grid-cols-4 gap-2">
     {avatars?.map((av) => (
       <img
@@ -199,20 +204,22 @@ useEffect(() => {
         src={av.avatarUrl}
         onClick={() => setSelectedAvatar(av)}
         className={`cursor-pointer border-2 rounded-full w-20 h-20 object-cover ${
-          selectedAvatar?.avatarUrl === av.avatarUrl 
-  ? "border-4 border-indigo-500 scale-105" 
-  : "border-gray-300"}`}
+          selectedAvatar?.avatarId === av.avatarId
+            ? "border-4 border-indigo-500 scale-105"
+            : "border-gray-300"
+        }`}
         alt="Avatar option"
       />
     ))}
   </div>
 </div>
 
+
             <button
               type="submit"
               disabled={loading}
               className={`w-full py-2 font-semibold rounded-lg shadow-md text-white transition-all duration-200 ${
-              loading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-800 hover:bg-indigo-700"
+              loading ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-600"
               }`}
 
             >
@@ -226,6 +233,8 @@ useEffect(() => {
           </p>
         </div>
       </div>
+    </div>
+    <div className="pt-14 bg-gray-100 " >
     </div>
        {/* Footer */}
   <Footer />
