@@ -4,6 +4,7 @@
 import { Avatar } from "./Avatar";
 
 export type User = {
+    userId: number;
     email: string;
     password: string;
     firstName: string;
@@ -11,4 +12,13 @@ export type User = {
     role: string;
     avatar: Avatar;
   };
+
+export interface RegisterRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  role: string;
+  avatar_id: number | null;
+}
   

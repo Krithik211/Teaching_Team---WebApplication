@@ -54,7 +54,7 @@ export default function SignInPage() {
       setTimeout(() => {
         if (foundUser.role === "lecturer") {
           router.push("/lecturer");
-        } else if (foundUser.role === "tutor") {
+        } else if (foundUser.role === "candidate") {
           router.push("/tutor");
         } else {
           router.push("/");

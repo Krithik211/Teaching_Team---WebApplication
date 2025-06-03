@@ -2,11 +2,10 @@ import Head from "next/head";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { userApi } from "@/services/api";
-import { User } from "@/types/User";
+import { RegisterRequest } from "@/types/User";
 import { Avatar } from "@/types/Avatar";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -18,21 +17,20 @@ export default function SignUpPage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState("tutor");
+  const [role, setRole] = useState("candidate");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+const [avatars, setAvatars] = useState<Avatar[] | null>(null);
+const [selectedAvatar, setSelectedAvatar] = useState<Avatar | null>(null);
 //   const avatars = [
 //   "https://mighty.tools/mockmind-api/content/cartoon/11.jpg",
 //   "https://mighty.tools/mockmind-api/content/cartoon/32.jpg",
 //   "https://mighty.tools/mockmind-api/content/cartoon/5.jpg",
 //   "https://mighty.tools/mockmind-api/content/cartoon/7.jpg",
 // ];
-const [avatars, setAvatars] = useState<Avatar[] | null>(null);
-const [selectedAvatar, setSelectedAvatar] = useState<Avatar | null>(null);
-
 useEffect(() => {
   const fetchData = async () => {
   const response = await userApi.getAvatar();
@@ -78,33 +76,25 @@ useEffect(() => {
   setLoading(true);
 
   try {
-    // const response = await axios.post("http://localhost:3001/api/register", {
-    //   firstName,
-    //   lastName,
-    //   email,
-    //   password,
-    //   role,
-    //   avatarUrl,
-    // });
-    const user = {
+    const user: RegisterRequest = {
       firstName: firstName,
       lastName: lastName,
       email: email,
       password: password,
       role: role,
-      avatar_id: selectedAvatar ? selectedAvatar.avatarId : 0,
+      avatar_id: selectedAvatar ? selectedAvatar.avatarId : null,
     }
     const response = await userApi.createUser(user);
-
-    if (response.data.user) {
+    console.log('Response of creating user:', response.user);
+    if (response.user) {
       toast.success("Registration successful!");
       setTimeout(() => router.push("/signIn"), 1500);
     } else {
-      setError(response.data.message || "Registration failed.");
+      setError(response.message || "Registration failed.");
     }
   } catch (err: any) {
-    if (err.response?.data?.message) {
-      setError(err.response.data.message);
+    if (err.response?.message) {
+      setError(err.response.message);
     } else {
       setError("Something went wrong. Please try again.");
     }
@@ -165,7 +155,7 @@ useEffect(() => {
               value={role}
               onChange={(e) => setRole(e.target.value)}
             >
-              <option value="tutor">Tutor</option>
+              <option value="candidate">Tutor Candidate</option>
               <option value="lecturer">Lecturer</option>
             </select>
             <label className="block text-sm font-medium text-gray-700">Password {formErrors.password && (

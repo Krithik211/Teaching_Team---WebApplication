@@ -21,7 +21,7 @@ const ProfileMenu: React.FC = () => {
     <div className="relative">
       <button onClick={toggleMenu} className="focus:outline-none">
         <img
-          src={currentUser?.avatar.avatarUrl || "/default-avatar.png"}
+          src={currentUser?.avatar?.avatarUrl || "/images/default_profile.svg"}
           alt="Profile"
           className="w-10 h-10 rounded-full border-2 border-white"
         />
