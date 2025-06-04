@@ -8,10 +8,31 @@ import CourseCard from "@/components/CourseCard";
 import { useProtectedRoute } from "@/hooks/useProtectedRoutes";
 import SubmittedApplications from "@/components/SubmittedApplications";
 import Footer from "@/components/Footer";
+import { useEffect } from "react";
+import { userApi } from "@/services/api";
+import { useCourse } from "@/context/CourseContext";
 
 export default function TutorDashboard() {
   // Restrict access to tutors only
   useProtectedRoute("candidate");
+  const {setCurrentSemesterCourses} = useCourse();
+
+  useEffect(() => {
+    const fetchData = async() => {
+      try{
+        const response = await userApi.getCourses();
+        const courses = response.courses;
+        if(courses){
+          console.log(courses);
+          setCurrentSemesterCourses(courses);
+        }
+      }
+      catch(error){
+        console.error(error);
+      }
+    }
+    fetchData();
+  }, [])
 
   return (
     <>

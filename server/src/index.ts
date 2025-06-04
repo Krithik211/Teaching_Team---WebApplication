@@ -4,7 +4,8 @@ import { AppDataSource } from "./data-source";
 import dotenv from "dotenv";
 import cors from "cors";
 import authRoutes from './routes/authRoutes';
-import avatarRoutes from './routes/avatarRoutes';
+import requestRoutes from './routes/requestRoutes';
+import applicationRoutes from './routes/applicationRoutes';
 
 dotenv.config();
 const PORT = process.env.PORT || 3002;
@@ -16,7 +17,8 @@ AppDataSource.initialize()
   .then(() => {
     console.log("Data Source has been initialized!");
     app.use("/api/auth", authRoutes);
-    app.use("/api/request", avatarRoutes);
+    app.use("/api/request", requestRoutes);
+    app.use("/api/application", applicationRoutes);
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });

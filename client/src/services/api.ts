@@ -1,18 +1,11 @@
 import axios from "axios";
 import { RegisterRequest, User } from "@/types/User";
+import { CoursesResponse } from "@/types/Course";
+import { Application } from "@/types/FormFields";
 
 export const api = axios.create({
   baseURL: "http://localhost:3001/api", // Adjust this to match your backend URL
 });
-
-// export interface User {
-//   userId: number;
-//   firstName: string;
-//   lastName: string;
-//   email: string;
-//   password: string;
-//   role: string;
-// }
 
 export interface LoginRequest {
   email: string;
@@ -44,13 +37,23 @@ export const userApi = {
   },
 
   updateUser: async (userId: number, user: Partial<User>) => {
-  console.log("➡️ Calling updateUser API", userId, user);
+  console.log("Calling updateUser API", userId, user);
   const response = await api.put(`/auth/user/update/${userId}`, user);
   return response.data;
 },
 
-  deleteTutorial: async (id: number) => {
-    const response = await api.delete(`/tutorials/${id}`);
+  getCourses: async (): Promise<CoursesResponse> => {
+    const response = await api.get("/request/getAllCourses");
     return response.data;
   },
+
+  saveApplication: async (application: Application): Promise<any> => {
+    const response = await api.post("/application/saveApplication", application);
+    return response.data;
+  },
+
+    getApplicationByUserId: async (userID: any): Promise<any> => {
+    const response = await api.get(`/application/getApplicationByUserId/${userID}`);
+    return response.data;
+  }
 };

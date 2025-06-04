@@ -51,7 +51,7 @@ const Navigation: React.FC<NavigationProps> = ({
         {/* Conditional navigation links (right side) */}
         <div className="flex items-center space-x-6">
           {showBackButton ? (
-  // ✅ Only back button
+  //  Only back button
   <></>
 ) : (!showSignOut && !showHome) && (
   <>

@@ -3,6 +3,9 @@ import { DataSource } from "typeorm";
 import { User } from "./entities/user";
 import dotenv from "dotenv";
 import { Avatar } from "./entities/avatar";
+import { Course } from "./entities/course";
+import { CoursePosition } from "./entities/coursePosition";
+import { TutorApplication } from "./entities/tutorApplication";
 
 dotenv.config();
 
@@ -15,7 +18,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME,
   synchronize: true,
   logging: false,
-  entities: [User, Avatar],
+  entities: [User, Avatar, Course, CoursePosition, TutorApplication],
   migrations: [],
   subscribers: [],
 });

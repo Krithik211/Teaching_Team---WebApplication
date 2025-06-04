@@ -11,164 +11,174 @@ import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import Footer from "@/components/Footer";
 import BackButton from "@/components/BackButton";
+import { userApi } from "@/services/api";
 
-export default function TutorApplication ()  {
-    useProtectedRoute("tutor");
-    const router = useRouter();
-    const { currentUser } = useAuth();
+export default function TutorApplication() {
+  useProtectedRoute("candidate");
+  const router = useRouter();
+  const { currentUser } = useAuth();
 
-    // Initial form data
-    const [formData, setFormData] = useState<Record<keyof FormFields, string>>({
-      firstName: "",
-      lastName: "",
+  // Initial form data
+  const [formData, setFormData] = useState<Record<keyof FormFields, string>>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    mobile: "",
+    course: "",
+    position: "",
+    availability: "",
+    previousRole: "",
+    skills: "",
+    qualification: "",
+    specialization: "",
+  });
+
+  // Interface for routing state
+  interface parsedProps {
+    courseCode: string,
+    courseName: string,
+    role: string,
+    isApplying: boolean,
+    isUpdating: boolean,
+  }
+
+  const [errors, setErrors] = useState<Partial<Record<keyof FormFields, string>>>({});
+  const [parsedState, setParsedState] = useState<parsedProps>({
+    courseCode: "",
+    courseName: "",
+    role: "",
+    isApplying: false,
+    isUpdating: false,
+  });
+
+  const { courseCode, courseName, role, isApplying, isUpdating } = parsedState;
+  const key = `${courseCode}_${currentUser?.email}`;
+
+  useEffect(() => {
+    if (currentUser === null) return;
+
+    // Load application state from localStorage
+    const storedApplicantState = localStorage.getItem("tutorApplicationState");
+    if (!storedApplicantState) {
+      router.push("/tutor");
+      return;
+    }
+
+    const parsedState = JSON.parse(storedApplicantState);
+    setParsedState(parsedState);
+
+    // Prefill form if applying
+    if (isApplying) {
+      setFormData((prev) => ({
+        ...prev,
+        firstName: currentUser.firstName,
+        lastName: currentUser.lastName,
+        email: currentUser.email,
+        course: parsedState.courseName,
+        position: parsedState.role,
+      }));
+    }
+
+    // Load full form details if updating
+    if (isUpdating) {
+      const allTutorApplications = JSON.parse(localStorage.getItem("tutorApplications") || "{}");
+      const key = `${parsedState.courseCode}_${currentUser?.email}`;
+      const submittedApplication = allTutorApplications[key];
+      console.log(submittedApplication);
+      setFormData(submittedApplication.FormDetails);
+    }
+  }, [courseName, currentUser, isApplying, isUpdating, role, router]);
+
+  // Handle form input change
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name as keyof FormFields]: value }));
+    setErrors((prev) => ({ ...prev, [name as keyof FormFields]: "" }));
+  };
+
+  // Form submission handler
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const newErrors: Partial<Record<keyof FormFields, string>> = {};
+    const requiredFields: (keyof FormFields)[] = [
+      "firstName", "lastName", "email", "mobile", "course",
+      "position", "availability", "previousRole", "skills",
+      "qualification", "specialization",
+    ];
+
+    // Validate required fields and mobile number
+    requiredFields.forEach((field) => {
+      if (!formData[field]) {
+        newErrors[field] = "This field is required.";
+      }
+      if (formData.mobile) {
+        const mobileRegex = /^[0-9+\s()-]{10,15}$/;
+        if (!mobileRegex.test(formData.mobile)) {
+          newErrors.mobile = "Please enter a valid phone number.";
+        }
+      }
+    });
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length === 0) {
+      // const allApplications = localStorage.getItem("tutorApplications");
+      // const parsedAllApplications = allApplications ? JSON.parse(allApplications) : {};
+
+      // const applications = {
+      //     FormDetails: formData,
+      // };
+
+      // parsedAllApplications[key] = applications;
+      // localStorage.setItem("tutorApplications", JSON.stringify(parsedAllApplications));
+      const application = {
+        ...formData,
+        userID: currentUser?.userId || 0,
+        courseCode: parsedState.courseCode,
+      };
+      const response = await userApi.saveApplication(application);
+      const applicationID = response.applicationID;
+      console.log('Application ID', applicationID);
+      if(applicationID){
+      // Show toast and redirect
+      toast.success(
+        isUpdating ? "Information updated successfully!" : "Application submitted successfully!",
+        {
+          position: "top-center",
+          autoClose: 2000,
+          onClose: () => {
+            localStorage.removeItem("tutorApplicationState");
+            router.push("/tutor");
+          },
+        }
+      );
+    }
+    }
+  };
+
+  // Resets form values
+  const handleReset = () => {
+    setFormData((prev) => ({
+      ...prev,
       email: "",
       mobile: "",
-      course: "",
-      position: "",
       availability: "",
       previousRole: "",
       skills: "",
       qualification: "",
       specialization: "",
-    });
+    }));
+    setErrors({});
+  };
 
-    // Interface for routing state
-    interface parsedProps {
-        courseCode: string,
-        courseName: string,
-        role: string,
-        isApplying: boolean,
-        isUpdating: boolean,
-    }
-
-    const [errors, setErrors] = useState<Partial<Record<keyof FormFields, string>>>({});
-    const [parsedState, setParsedState] = useState<parsedProps>({
-        courseCode: "",
-        courseName: "",
-        role: "",
-        isApplying: false,
-        isUpdating: false,
-    });
-
-    const { courseCode, courseName, role, isApplying, isUpdating } = parsedState;
-    const key = `${courseCode}_${currentUser?.email}`;
-
-    useEffect(() => {
-        if (currentUser === null) return;
-
-        // Load application state from localStorage
-        const storedApplicantState = localStorage.getItem("tutorApplicationState");
-        if (!storedApplicantState) {
-            router.push("/tutor");
-            return;
-        }
-
-        const parsedState = JSON.parse(storedApplicantState);
-        setParsedState(parsedState);
-
-        // Prefill form if applying
-        if (isApplying) {
-            setFormData((prev) => ({
-                ...prev,
-                firstName: currentUser.firstName,
-                lastName: currentUser.lastName,
-                email: currentUser.email,
-                course: parsedState.courseName,
-                position: parsedState.role,
-            }));
-        }
-
-        // Load full form details if updating
-        if (isUpdating) {
-            const allTutorApplications = JSON.parse(localStorage.getItem("tutorApplications") || "{}");
-            const key = `${parsedState.courseCode}_${currentUser?.email}`;
-            const submittedApplication = allTutorApplications[key];
-            console.log(submittedApplication);
-            setFormData(submittedApplication.FormDetails);
-        }
-    }, [courseName, currentUser, isApplying, isUpdating, role, router]);
-
-    // Handle form input change
-    const handleChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-    ) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name as keyof FormFields]: value }));
-        setErrors((prev) => ({ ...prev, [name as keyof FormFields]: "" }));
-    };
-
-    // Form submission handler
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        const newErrors: Partial<Record<keyof FormFields, string>> = {};
-        const requiredFields: (keyof FormFields)[] = [
-            "firstName", "lastName", "email", "mobile", "course",
-            "position", "availability", "previousRole", "skills",
-            "qualification", "specialization",
-        ];
-
-        // Validate required fields and mobile number
-        requiredFields.forEach((field) => {
-            if (!formData[field]) {
-                newErrors[field] = "This field is required.";
-            }
-            if (formData.mobile) {
-                const mobileRegex = /^[0-9+\s()-]{10,15}$/;
-                if (!mobileRegex.test(formData.mobile)) {
-                    newErrors.mobile = "Please enter a valid phone number.";
-                }
-            }
-        });
-
-        setErrors(newErrors);
-
-        if (Object.keys(newErrors).length === 0) {
-            const allApplications = localStorage.getItem("tutorApplications");
-            const parsedAllApplications = allApplications ? JSON.parse(allApplications) : {};
-
-            const applications = {
-                FormDetails: formData,
-            };
-
-            parsedAllApplications[key] = applications;
-            localStorage.setItem("tutorApplications", JSON.stringify(parsedAllApplications));
-
-            // Show toast and redirect
-            toast.success(
-                isUpdating ? "Information updated successfully!" : "Application submitted successfully!",
-                {
-                    position: "top-center",
-                    autoClose: 2000,
-                    onClose: () => {
-                        localStorage.removeItem("tutorApplicationState");
-                        router.push("/tutor");
-                    },
-                }
-            );
-        }
-    };
-
-    // Resets form values
-    const handleReset = () => {
-        setFormData((prev) => ({
-            ...prev,
-            email: "",
-            mobile: "",
-            availability: "",
-            previousRole: "",
-            skills: "",
-            qualification: "",
-            specialization: "",
-        }));
-        setErrors({});
-    };
-
-    return (
+  return (
     <>
-        <div className="absolute top-10 left-10 z-50">
-            <BackButton to="/tutor" label="Dashboard" />
-        </div>
-        <div className="min-h-screen bg-gray-100 py-10 px-4 mt-4 font-poppins pt-20">
+      <div className="absolute top-10 left-10 z-50">
+        <BackButton to="/tutor" label="Dashboard" />
+      </div>
+      <div className="min-h-screen bg-gray-100 py-10 px-4 mt-4 font-poppins pt-20">
         <div className="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-md">
           <h1 className="text-2xl font-bold text-gray-800 mb-6">
             {isUpdating ? "Update Your Application" : "Application Form"}
@@ -231,20 +241,20 @@ export default function TutorApplication ()  {
 
             {/* Course */}
             <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Course *</label>
-                <select
-                    name="course"
-                    value={formData.course}
-                    // onChange={handleChange}
-                    disabled //disables editing
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-800 bg-gray-100 cursor-not-allowed"
-                >
-                    <option value={formData.course}>
-                    {formData.course || "Pre-selected course"}
-                    </option>
-                </select>
-                {/* {errors.course && <p className="text-red-500 text-sm mt-1">{errors.course}</p>} */}
-                </div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Course *</label>
+              <select
+                name="course"
+                value={formData.course}
+                // onChange={handleChange}
+                disabled //disables editing
+                className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-800 bg-gray-100 cursor-not-allowed"
+              >
+                <option value={formData.course}>
+                  {formData.course || "Pre-selected course"}
+                </option>
+              </select>
+              {/* {errors.course && <p className="text-red-500 text-sm mt-1">{errors.course}</p>} */}
+            </div>
 
             {/* Position */}
             <div>
@@ -257,7 +267,7 @@ export default function TutorApplication ()  {
                 className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-800 bg-gray-100 cursor-not-allowed"
               >
                 <option value={formData.position}>
-                {formData.position || "Pre-selected course"}
+                  {formData.position || "Pre-selected course"}
                 </option>
               </select>
               {/* {errors.position && <p className="text-red-500 text-sm mt-1">{errors.position}</p>} */}
@@ -361,6 +371,6 @@ export default function TutorApplication ()  {
       </div>
       <Footer />
       <ToastContainer />
-      </>
-    )
+    </>
+  )
 };

@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from "typeorm";
 import { Avatar } from "./avatar";
+import { TutorApplication } from "./tutorApplication";
 
 @Entity({ name: "users" }) // Use the actual table name
 export class User {
@@ -24,11 +25,11 @@ export class User {
   @Column({ name: "date_joined", type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   dateJoined!: Date;
 
-  
-  // @Column({ name: "avatar_url", type: "varchar", length: 255, nullable: true })
-  // avatarUrl?: string;
   @ManyToOne(() => Avatar)
   @JoinColumn({ name: "avatar_id" })
   avatar!: Avatar;
+
+  @OneToMany(() => TutorApplication, (application) => application.user)
+  applications!: TutorApplication[];
 
 }

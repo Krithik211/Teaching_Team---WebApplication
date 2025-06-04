@@ -5,7 +5,7 @@ import { Avatar } from "../entities/avatar";
 
 // ------------------- GET ALL AVATARS -------------------
 
-export const getAvatars = async (req: Request, res: Response): Promise<void> => {
+export const getAvatars = async (req: Request, res: Response): Promise<any> => {
   try {
     const avatarRepo = AppDataSource.getRepository(Avatar);
     const avatars = await avatarRepo.find();

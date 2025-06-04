@@ -7,7 +7,7 @@ import { Avatar } from "@/types/Avatar";
 import { userApi } from "@/services/api";
 import Navigation from "@/components/Navigation";
 import { UpdateUserRequest } from "@/types/User";
-
+import { useAuth } from "@/context/AuthContext";
 
 
 const EditProfilePage = () => {
@@ -16,6 +16,7 @@ const EditProfilePage = () => {
   const [avatars, setAvatars] = useState<Avatar[]>([]);
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const {setCurrentUser} = useAuth();
 
   // Form fields
   const [firstName, setFirstName] = useState("");
@@ -47,10 +48,10 @@ const EditProfilePage = () => {
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-     console.log("Update form submitted"); // ✅ Add this
+     console.log("Update form submitted"); // Add this
 
-     // ✅ Place this right below it:
-  console.log("📦 Payload to update:", {
+     // Place this right below it:
+  console.log(" Payload to update:", {
     firstName,
     lastName,
     email,
@@ -83,10 +84,11 @@ const response = await userApi.updateUser(user!.userId, updatedUser);
 
 toast.success("Profile updated!");
 localStorage.setItem("CurrentUser", JSON.stringify(response.user));
+setCurrentUser(response.user);
 setUser(response.user);
 setIsEditing(false);
 
-      if (response.user.role === "lecturer") {
+  if (response.user.role === "lecturer") {
   router.push("/lecturer");
 } else if (response.user.role === "tutor" || response.user.role === "candidate") {
   router.push("/tutor");
