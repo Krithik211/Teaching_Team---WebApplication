@@ -61,8 +61,7 @@ export default function SignInPage() {
         }
       }, 1000);
     } else {
-      setError("Invalid username or password!");
-
+      setError(response.message);
     }
   }, 800);
   };

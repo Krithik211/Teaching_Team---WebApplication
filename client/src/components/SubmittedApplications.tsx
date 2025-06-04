@@ -6,27 +6,36 @@ import { useRouter } from "next/router";
 import { useAuth } from "@/context/AuthContext";
 import { userApi } from "@/services/api";
 import { TutorApplication } from "@/types/FormFields";
+import { useApplication } from "@/context/ApplicationContext";
 
 const SubmittedApplications = () => {
   const [currentTutorApplications, setCurrentTutorApplications] = useState<TutorApplication[]>([]);
   const { currentUser } = useAuth();
   const router = useRouter();
+  const { setCurrentUserApplication } = useApplication();
 
   useEffect(() => {
     const fetchData = async () => {
+      try{
       const response = await userApi.getApplicationByUserId(currentUser?.userId);
       const userApplications = response.applications;
       if(userApplications?.length > 0){
         setCurrentTutorApplications(userApplications);
+        setCurrentUserApplication(userApplications);
       }
     }
+    catch(error){
+      console.error("Failed to fetch applications:", error);
+    }
+  }
     fetchData();
-  }, [currentUser]);
+  }, []);
 
   // Prepares update state and redirects to the tutor application form
-  const handleUpdate = (course_name: string, course_code: string, role: string) => {
+  const handleUpdate = (application_id:number, course_name: string, course_code: string, role: string) => {
     console.log(course_name);
     const applyingState = {
+      applicationId: application_id,
       courseCode: course_code,
       courseName: course_name,
       role: role,
@@ -63,6 +72,7 @@ const SubmittedApplications = () => {
             <button
               onClick={() =>
                 handleUpdate(
+                  application.applicationID,
                   application.course,
                   application.courseCode,
                   application.position

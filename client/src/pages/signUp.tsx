@@ -33,10 +33,20 @@ const [selectedAvatar, setSelectedAvatar] = useState<Avatar | null>(null);
 // ];
 useEffect(() => {
   const fetchData = async () => {
+  try{
   const response = await userApi.getAvatar();
   const avatars = response.avatars;
+  if(avatars){
   console.log('Avatars', avatars);
   setAvatars(avatars);
+  }
+  else{
+    toast.error(response.message);
+  }
+  }
+  catch(error: any){
+    toast.error(error || "Server error");
+  }
   }
   fetchData();
 }, [])

@@ -5,6 +5,7 @@ import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { AuthProvider } from "../context/AuthContext";
 import { CourseProvider } from "@/context/CourseContext";
+import { ApplicationProvider } from "@/context/ApplicationContext";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -12,7 +13,9 @@ export default function App({ Component, pageProps }: AppProps) {
     <AuthProvider>
       {/* Provide course data context to the entire app */}
       <CourseProvider>
+        <ApplicationProvider>
         <Component {...pageProps} />
+        </ApplicationProvider>
       </CourseProvider>
     </AuthProvider>
   );

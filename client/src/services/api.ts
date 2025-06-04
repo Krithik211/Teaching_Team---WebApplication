@@ -37,10 +37,10 @@ export const userApi = {
   },
 
   updateUser: async (userId: number, user: Partial<User>) => {
-  console.log("Calling updateUser API", userId, user);
-  const response = await api.put(`/auth/user/update/${userId}`, user);
-  return response.data;
-},
+    console.log("Calling updateUser API", userId, user);
+    const response = await api.put(`/auth/user/update/${userId}`, user);
+    return response.data;
+  },
 
   getCourses: async (): Promise<CoursesResponse> => {
     const response = await api.get("/request/getAllCourses");
@@ -52,8 +52,13 @@ export const userApi = {
     return response.data;
   },
 
-    getApplicationByUserId: async (userID: any): Promise<any> => {
+  getApplicationByUserId: async (userID: any): Promise<any> => {
     const response = await api.get(`/application/getApplicationByUserId/${userID}`);
     return response.data;
+  },
+
+  updateApplicationByID: async (application: any): Promise<any> => {
+    const response = await api.put("/application/updateApplication", application);
+    return response.data;
   }
-};
+  };

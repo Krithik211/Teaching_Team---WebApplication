@@ -12,11 +12,13 @@ import 'react-toastify/dist/ReactToastify.css';
 import Footer from "@/components/Footer";
 import BackButton from "@/components/BackButton";
 import { userApi } from "@/services/api";
+import { useApplication } from "@/context/ApplicationContext";
 
 export default function TutorApplication() {
   useProtectedRoute("candidate");
   const router = useRouter();
   const { currentUser } = useAuth();
+  const { currentUserApplication } = useApplication();
 
   // Initial form data
   const [formData, setFormData] = useState<Record<keyof FormFields, string>>({
@@ -35,6 +37,7 @@ export default function TutorApplication() {
 
   // Interface for routing state
   interface parsedProps {
+    applicationId?: number,
     courseCode: string,
     courseName: string,
     role: string,
@@ -44,6 +47,7 @@ export default function TutorApplication() {
 
   const [errors, setErrors] = useState<Partial<Record<keyof FormFields, string>>>({});
   const [parsedState, setParsedState] = useState<parsedProps>({
+    applicationId: 0,
     courseCode: "",
     courseName: "",
     role: "",
@@ -81,11 +85,27 @@ export default function TutorApplication() {
 
     // Load full form details if updating
     if (isUpdating) {
-      const allTutorApplications = JSON.parse(localStorage.getItem("tutorApplications") || "{}");
-      const key = `${parsedState.courseCode}_${currentUser?.email}`;
-      const submittedApplication = allTutorApplications[key];
-      console.log(submittedApplication);
-      setFormData(submittedApplication.FormDetails);
+      const matchApplication = currentUserApplication?.find(
+        (app) => app.applicationID === parsedState.applicationId
+      );
+      //const submittedApplication = allTutorApplications[key];
+      console.log(matchApplication);
+      if (matchApplication) {
+        setFormData({
+          firstName: matchApplication.firstName,
+          lastName: matchApplication.lastName,
+          email: matchApplication.email,
+          mobile: matchApplication.mobile,
+          course: matchApplication.course,
+          position: matchApplication.position,
+          availability: matchApplication.availability,
+          previousRole: matchApplication.previousRole,
+          skills: matchApplication.skills,
+          qualification: matchApplication.qualification,
+          specialization: matchApplication.specialization,
+        });
+      }
+      //setFormData(submittedApplication.FormDetails);
     }
   }, [courseName, currentUser, isApplying, isUpdating, role, router]);
 
@@ -124,37 +144,37 @@ export default function TutorApplication() {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      // const allApplications = localStorage.getItem("tutorApplications");
-      // const parsedAllApplications = allApplications ? JSON.parse(allApplications) : {};
-
-      // const applications = {
-      //     FormDetails: formData,
-      // };
-
-      // parsedAllApplications[key] = applications;
-      // localStorage.setItem("tutorApplications", JSON.stringify(parsedAllApplications));
       const application = {
         ...formData,
         userID: currentUser?.userId || 0,
         courseCode: parsedState.courseCode,
       };
-      const response = await userApi.saveApplication(application);
+      let response;
+      if (parsedState.isApplying) {
+        response = await userApi.saveApplication(application);
+      }
+      else if (parsedState.isUpdating && parsedState.applicationId) {
+        response = await userApi.updateApplicationByID({
+          ...application,
+          applicationID: parsedState.applicationId,
+        });
+      }
       const applicationID = response.applicationID;
       console.log('Application ID', applicationID);
-      if(applicationID){
-      // Show toast and redirect
-      toast.success(
-        isUpdating ? "Information updated successfully!" : "Application submitted successfully!",
-        {
-          position: "top-center",
-          autoClose: 2000,
-          onClose: () => {
-            localStorage.removeItem("tutorApplicationState");
-            router.push("/tutor");
-          },
-        }
-      );
-    }
+      if (applicationID) {
+        // Show toast and redirect
+        toast.success(
+          isUpdating ? "Information updated successfully!" : "Application submitted successfully!",
+          {
+            position: "top-center",
+            autoClose: 2000,
+            onClose: () => {
+              localStorage.removeItem("tutorApplicationState");
+              router.push("/tutor");
+            },
+          }
+        );
+      }
     }
   };
 
