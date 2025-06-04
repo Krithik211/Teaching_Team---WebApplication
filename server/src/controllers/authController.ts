@@ -22,7 +22,7 @@ export const registerUser = async (
   const { firstName, lastName, email, password, role, avatar_id } = req.body;
 
   if (!firstName || !lastName || !email || !password || !role) {
-    return res.status(400).json({
+    return res.status(201).json({
       message: "All fields are required.",
       user: null,
     });
@@ -33,7 +33,7 @@ export const registerUser = async (
 
     const existingUser = await userRepo.findOneBy({ email });
     if (existingUser) {
-      return res.status(409).json({
+      return res.status(201).json({
         message: "Email already registered.",
         user: null,
       });
@@ -74,7 +74,7 @@ export const loginUser = async (
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({
+    return res.status(200).json({
       message: "Email and password are required.",
       user: null,
     });
@@ -88,7 +88,7 @@ export const loginUser = async (
     });
 
     if (!user) {
-      return res.status(401).json({
+      return res.status(200).json({
         message: "Invalid email or password.",
         user: null,
       });
@@ -103,7 +103,7 @@ export const loginUser = async (
     }
 
     if (!isMatch) {
-      return res.status(401).json({
+      return res.status(200).json({
         message: "Invalid email or password.",
         user: null,
       });

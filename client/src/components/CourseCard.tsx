@@ -19,6 +19,7 @@ const CourseCard = () => {
       toast.warn("Please select a role before applying.", { position: "top-center", autoClose: 2000 });
       return;
     }
+    console.log('Current user application', currentUserApplication);
     const alreadyApplied = currentUserApplication?.some(
       (app) => app.courseCode === course_code && app.position === role
     );
