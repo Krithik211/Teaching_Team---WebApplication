@@ -17,9 +17,11 @@ const SubmittedApplications = () => {
   useEffect(() => {
     const fetchData = async () => {
       try{
+      console.log('currentUser', currentUser?.userId);
       const response = await userApi.getApplicationByUserId(currentUser?.userId);
       const userApplications = response.applications;
       if(userApplications?.length > 0){
+        console.log('current application: ', userApplications);
         setCurrentTutorApplications(userApplications);
         setCurrentUserApplication(userApplications);
       }

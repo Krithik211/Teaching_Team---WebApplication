@@ -58,10 +58,10 @@ export const saveApplication = async (req: Request, res: Response): Promise<any>
 
 export const getApplicationByUserId = async (req: Request, res: Response): Promise<any> => {
 try {
-     const userId = parseInt(req.params.userId, 10);
-
+    const userId = Number(req.params.userId);
+    console.log('user id:', userId);
     if (!userId) {
-      return res.status(400).json({ message: "userId is required", applications: [] });
+      return res.status(200).json({ message: "userId is required", applications: [] });
     }
 
     const appRepo = AppDataSource.getRepository(TutorApplication);
