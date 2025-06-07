@@ -1,8 +1,9 @@
 // Course context to provide access to the list of current semester courses.
 // Initializes course data from localStorage or defaults if none exist.
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { Course } from "../types/Course";
+import { userApi } from "@/services/api";
 
 interface CourseContextType {
   currentSemesterCourses: Course[] | null;
@@ -14,6 +15,23 @@ const CourseContext = createContext<CourseContextType | undefined>(undefined);
 
 export function CourseProvider({ children }: { children: React.ReactNode }) {
   const [currentSemesterCourses, setCurrentSemesterCourses] = useState<Course[] | null>(null);
+
+    useEffect(() => {
+      const fetchData = async() => {
+        try{
+          const response = await userApi.getCourses();
+          const courses = response.courses;
+          if(courses){
+            console.log(courses);
+            setCurrentSemesterCourses(courses);
+          }
+        }
+        catch(error){
+          console.error(error);
+        }
+      }
+      fetchData();
+    }, [])
 
   return (
     <CourseContext.Provider value={{ currentSemesterCourses, setCurrentSemesterCourses }}>

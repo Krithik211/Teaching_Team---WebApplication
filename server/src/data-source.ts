@@ -6,6 +6,9 @@ import { Avatar } from "./entities/avatar";
 import { Course } from "./entities/course";
 import { CoursePosition } from "./entities/coursePosition";
 import { TutorApplication } from "./entities/tutorApplication";
+import { Semester } from "./entities/semester";
+import { LecturerCourse } from "./entities/lectureCourses";
+import { ApplicantRanking } from "./entities/applicantRanking";
 
 dotenv.config();
 
@@ -18,7 +21,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME,
   synchronize: true,
   logging: false,
-  entities: [User, Avatar, Course, CoursePosition, TutorApplication],
+  entities: [User, Avatar, Course, CoursePosition, TutorApplication, Semester, LecturerCourse, ApplicantRanking],
   migrations: [],
   subscribers: [],
 });

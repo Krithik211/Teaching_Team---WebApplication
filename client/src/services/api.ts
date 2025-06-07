@@ -60,5 +60,34 @@ export const userApi = {
   updateApplicationByID: async (application: any): Promise<any> => {
     const response = await api.put("/application/updateApplication", application);
     return response.data;
-  }
-  };
+  },
+  getCoursesByLecturerId: async (userID: any): Promise<any> => {
+    const response = await api.get(`/request/getLecturerCourses/${userID}`);
+    return response.data;
+  },
+
+  getApplicationByLecturerID: async (userID: any): Promise<any> => {
+    const response = await api.get(`/application/getApplicationsByLecturer/${userID}`);
+    return response.data;
+  },
+
+  getExistingRanking: async (userID: any): Promise<any> => {
+    const response = await api.get(`/ranking/getExistingRanking/${userID}`);
+    return response.data;
+  },
+
+  saveRanking: async (data: {
+    userId: any;
+    applicationId: string;
+    rank: string;
+    comment: string;
+  }) => {
+    const response = await api.post('/ranking/insertAndUpdate', data);
+    return response.data;
+  },
+
+  deleteRanking: async (data: { userId: any; applicationId: string }) => {
+    return await api.delete("/ranking/delete", { data });
+  },
+
+};

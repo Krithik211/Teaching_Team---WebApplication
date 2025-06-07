@@ -6,6 +6,7 @@ import type { AppProps } from "next/app";
 import { AuthProvider } from "../context/AuthContext";
 import { CourseProvider } from "@/context/CourseContext";
 import { ApplicationProvider } from "@/context/ApplicationContext";
+import { LecturerProvider } from "@/context/LecturerContext";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -13,9 +14,11 @@ export default function App({ Component, pageProps }: AppProps) {
     <AuthProvider>
       {/* Provide course data context to the entire app */}
       <CourseProvider>
+        <LecturerProvider>
         <ApplicationProvider>
         <Component {...pageProps} />
         </ApplicationProvider>
+        </LecturerProvider>
       </CourseProvider>
     </AuthProvider>
   );

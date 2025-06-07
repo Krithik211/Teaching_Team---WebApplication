@@ -3,7 +3,6 @@
 
 import React, { createContext, useContext, useState } from "react";
 import { User } from "../types/User";
-
 interface AuthContextType {
   currentUser: User | null;
   setCurrentUser: (user: User | null) => void;

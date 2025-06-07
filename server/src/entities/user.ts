@@ -1,7 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from "typeorm";
 import { Avatar } from "./avatar";
 import { TutorApplication } from "./tutorApplication";
-
+import { LecturerCourse } from "./lectureCourses";
+import { ApplicantRanking } from "./applicantRanking";
 @Entity({ name: "users" }) // Use the actual table name
 export class User {
   @PrimaryGeneratedColumn({ name: "user_id" })
@@ -32,4 +33,9 @@ export class User {
   @OneToMany(() => TutorApplication, (application) => application.user)
   applications!: TutorApplication[];
 
+  @OneToMany(() => LecturerCourse, (lc) => lc.lecturer)
+  lecturerCourses!: LecturerCourse[];
+
+  @OneToMany(() => ApplicantRanking, ranking => ranking.user)
+  rankings!: ApplicantRanking[];
 }

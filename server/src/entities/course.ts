@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany,ManyToOne,OneToMany, JoinTable } from "typeorm";
 import { CoursePosition } from "./coursePosition";
-
+import { Semester } from "./semester";
+import { LecturerCourse } from "./lectureCourses";
 @Entity("courses")
 export class Course {
   @PrimaryGeneratedColumn()
@@ -25,4 +26,10 @@ export class Course {
     }
   })
   positions!: CoursePosition[];
+
+@ManyToOne(() => Semester, (semester) => semester.courses, { onDelete: "RESTRICT", onUpdate: "CASCADE" })
+semester!: Semester;
+
+@OneToMany(() => LecturerCourse, (lc) => lc.course)
+lecturerCourses!: LecturerCourse[];
 }

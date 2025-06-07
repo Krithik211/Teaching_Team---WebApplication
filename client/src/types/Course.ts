@@ -17,4 +17,10 @@ export interface CoursesResponse {
   message: string;
   courses: Course[];
 }
+
+export interface LecturerCourse {
+  courseCode: string;
+  courseName: string;
+  semesterName: string;
+}
   

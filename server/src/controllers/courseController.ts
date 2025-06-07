@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { Course } from "../entities/course";
+import { LecturerCourse } from "../entities/lectureCourses";
 
 export const getCourses = async (req: Request, res: Response): Promise<any> => {
   try {
@@ -19,3 +20,34 @@ export const getCourses = async (req: Request, res: Response): Promise<any> => {
     });
   }
 };
+
+export const getLecturerCourses = async (req: Request, res: Response): Promise<any> => {
+  const { lecturerId } = req.params;
+
+  try {
+    const lecturerCourseRepo = AppDataSource.getRepository(LecturerCourse);
+
+    const lecturerCourses = await lecturerCourseRepo.find({
+      where: {
+        lecturer: { userId: Number(lecturerId) }
+      },
+      relations: {
+        course: true,
+        semester: true
+      }
+    });
+
+    // Extract only necessary fields
+    const filteredCourses = lecturerCourses.map((lc) => ({
+      courseCode: lc.course.course_code,
+      courseName: lc.course.course_name,
+      semesterName: lc.semester.semesterName
+    }));
+
+    return res.status(200).json({ courses: filteredCourses });
+  } catch (error) {
+    console.error("Error fetching lecturer courses:", error);
+    return res.status(500).json({ message: "Failed to retrieve lecturer courses." });
+  }
+};
+
