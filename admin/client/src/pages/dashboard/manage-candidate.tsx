@@ -1,30 +1,29 @@
 import { useEffect, useState } from "react";
 import {
   Box,
-  Heading,
+  Container,
+  Typography,
   Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
   Button,
-  useToast,
-} from "@chakra-ui/react";
+  Paper
+} from "@mui/material";
 import { userService } from "@/services/userService";
 import { User } from "@/types/type";
 
 const ManageCandidates = () => {
   const [candidates, setCandidates] = useState<User[]>([]);
-  const toast = useToast();
 
   const fetchCandidates = async () => {
     try {
       const users = await userService.getAllUsers();
-      const filtered = users.filter((u) => u.roleId === 2);
+      const filtered = users.filter((u) => u.roleId === 2); // candidates
       setCandidates(filtered);
     } catch {
-      toast({ title: "Failed to fetch users", status: "error" });
+      alert("Failed to fetch users");
     }
   };
 
@@ -32,14 +31,14 @@ const ManageCandidates = () => {
     try {
       if (isBlocked) {
         await userService.unblockUser(userId);
-        toast({ title: "Candidate unblocked", status: "success" });
+        alert("Candidate unblocked");
       } else {
         await userService.blockUser(userId);
-        toast({ title: "Candidate blocked", status: "success" });
+        alert("Candidate blocked");
       }
-      fetchCandidates(); // Refresh list
+      fetchCandidates();
     } catch {
-      toast({ title: "Action failed", status: "error" });
+      alert("Action failed");
     }
   };
 
@@ -48,36 +47,42 @@ const ManageCandidates = () => {
   }, []);
 
   return (
-    <Box p={6}>
-      <Heading mb={4}>Manage Candidates</Heading>
-      <Table variant="simple">
-        <Thead>
-          <Tr>
-            <Th>Name</Th>
-            <Th>Email</Th>
-            <Th>Status</Th>
-            <Th>Action</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {candidates.map((user) => (
-            <Tr key={user.id}>
-              <Td>{user.firstName} {user.lastName}</Td>
-              <Td>{user.email}</Td>
-              <Td>{user.isBlocked ? "Blocked" : "Active"}</Td>
-              <Td>
-                <Button
-                  colorScheme={user.isBlocked ? "green" : "red"}
-                  onClick={() => toggleBlock(Number(user.id), user.isBlocked)}
-                >
-                  {user.isBlocked ? "Unblock" : "Block"}
-                </Button>
-              </Td>
-            </Tr>
-          ))}
-        </Tbody>
-      </Table>
-    </Box>
+    <Container maxWidth="md" sx={{ mt: 4 }}>
+      <Paper elevation={3} sx={{ padding: 3 }}>
+        <Typography variant="h5" gutterBottom>
+          Manage Candidates
+        </Typography>
+
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell><strong>Name</strong></TableCell>
+              <TableCell><strong>Email</strong></TableCell>
+              <TableCell><strong>Status</strong></TableCell>
+              <TableCell><strong>Action</strong></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {candidates.map((user) => (
+              <TableRow key={user.id}>
+                <TableCell>{user.firstName} {user.lastName}</TableCell>
+                <TableCell>{user.email}</TableCell>
+                <TableCell>{user.isBlocked ? "Blocked" : "Active"}</TableCell>
+                <TableCell>
+                  <Button
+                    variant="contained"
+                    color={user.isBlocked ? "success" : "error"}
+                    onClick={() => toggleBlock(Number(user.id), user.isBlocked)}
+                  >
+                    {user.isBlocked ? "Unblock" : "Block"}
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Paper>
+    </Container>
   );
 };
 

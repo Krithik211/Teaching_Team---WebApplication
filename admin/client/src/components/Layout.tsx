@@ -1,15 +1,25 @@
-import { Box, Flex } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
+import { Box } from "@mui/material";
 import Sidebar from "./Sidebar";
-import { ReactNode } from "react";
+import { useRouter } from "next/router";
 
-const Layout = ({ children }: { children: ReactNode }) => {
+const Layout = ({ children }: { children: React.ReactNode }) => {
+  const [showSidebar, setShowSidebar] = useState(false);
+  const router = useRouter();
+
+ useEffect(() => {
+  if (typeof window !== "undefined") {
+    const isLoggedIn = localStorage.getItem("isAdminLoggedIn") === "true";
+    setShowSidebar(isLoggedIn);
+  }
+}, [router.pathname]);
   return (
-    <Flex>
-      <Sidebar />
-      <Box flex="1" p={6} bg="gray.50">
+    <Box display="flex" minHeight="100vh">
+      {showSidebar && <Sidebar />}
+      <Box flexGrow={1} p={3}>
         {children}
       </Box>
-    </Flex>
+    </Box>
   );
 };
 

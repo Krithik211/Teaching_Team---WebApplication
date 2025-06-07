@@ -1,122 +1,177 @@
 import { useEffect, useState } from "react";
 import {
-    Box,
-    Button,
-    Flex,
-    FormControl,
-    FormLabel,
-    Heading,
-    Input,
-    Stack,
-    Text,
-    useToast,
-} from "@chakra-ui/react";
+  Box,
+  Button,
+  Container,
+  TextField,
+  Typography,
+  Stack,
+  Paper,
+  Divider,
+  Grid,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  FormLabel,
+  FormControl,
+} from "@mui/material";
 import { courseService } from "@/services/courseService";
 import { Course } from "@/types/type";
 
 const ManageCourses = () => {
-    const toast = useToast();
-    const [courses, setCourses] = useState<Course[]>([]);
-    const [courseName, setCourseName] = useState("");
-    const [courseCode, setCourseCode] = useState("");
-    const [editingId, setEditingId] = useState<number | null>(null);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [courseName, setCourseName] = useState("");
+  const [courseCode, setCourseCode] = useState("");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [semester, setSemester] = useState("S1");
 
-    const fetchCourses = async () => {
-        try {
-            const result = await courseService.getCourses();
-            setCourses(result);
-        } catch {
-            toast({ title: "Failed to load courses.", status: "error" });
-        }
-    };
 
-    const handleSubmit = async () => {
-        if (!courseName || !courseCode) {
-            toast({ title: "All fields are required.", status: "warning" });
-            return;
-        }
+  const fetchCourses = async () => {
+    try {
+      const result = await courseService.getCourses();
+      setCourses(result);
+    } catch {
+      alert("Failed to load courses.");
+    }
+  };
 
-        try {
-            if (editingId !== null) {
-                console.log("id", editingId);
-                console.log("Updating with:", {
-                    id: editingId,
-                    courseName,
-                    courseCode,
-                });
+  const handleSubmit = async () => {
+    if (!courseName || !courseCode) {
+      alert("All fields are required.");
+      return;
+    }
 
-                await courseService.updateCourse(editingId, courseName, courseCode);
-                toast({ title: "Course updated.", status: "success" });
-                setEditingId(null);
-            } else {
-                await courseService.addCourse(courseName, courseCode);
-                toast({ title: "Course added.", status: "success" });
-            }
+    try {
+      if (editingId !== null) {
+        await courseService.updateCourse(editingId, courseName, courseCode);
+        alert("Course updated.");
+        setEditingId(null);
+      } else {
+        await courseService.addCourse(courseName, courseCode);
+        alert("Course added.");
+      }
 
-            setCourseName("");
-            setCourseCode("");
-            await fetchCourses();
-        } catch {
-            toast({ title: "Operation failed.", status: "error" });
-        }
-    };
+      setCourseName("");
+      setCourseCode("");
+      await fetchCourses();
+    } catch {
+      alert("Operation failed.");
+    }
+  };
 
-    const handleDelete = async (id: number) => {
-        try {
-            await courseService.deleteCourse(id);
-            toast({ title: "Course deleted.", status: "info" });
-            await fetchCourses();
-        } catch {
-            toast({ title: "Delete failed.", status: "error" });
-        }
-    };
+  const handleDelete = async (id: number) => {
+    try {
+      await courseService.deleteCourse(id);
+      alert("Course deleted.");
+      await fetchCourses();
+    } catch {
+      alert("Delete failed.");
+    }
+  };
 
-    const handleEdit = (course: Course) => {
-        setEditingId(course.id);
-        setCourseName(course.courseName);
-        setCourseCode(course.courseCode);
-    };
+  const handleEdit = (course: Course) => {
+    setEditingId(course.id);
+    setCourseName(course.courseName);
+    setCourseCode(course.courseCode);
+  };
 
-    useEffect(() => {
-        fetchCourses();
-    }, []);
+  useEffect(() => {
+    fetchCourses();
+  }, []);
 
-    return (
-        <Box p={6} maxW="600px" mx="auto">
-            <Heading mb={4}>Manage Courses</Heading>
+  return (
+    <Container maxWidth="sm" sx={{ mt: 4 }}>
+      <Paper elevation={3} sx={{ padding: 4 }}>
+        <Typography variant="h5" gutterBottom>
+          Manage Courses
+        </Typography>
+        <Stack spacing={3} mb={4}>
+  <FormControl>
+    <RadioGroup
+      row
+      value={semester}
+      onChange={(e) => setSemester(e.target.value)}
+    >
+      <FormControlLabel value="S1" control={<Radio />} label="Semester 1" />
+      <FormControlLabel value="S2" control={<Radio />} label="Semester 2" />
+    </RadioGroup>
+  </FormControl>
 
-            <Stack spacing={4} mb={6}>
-                <FormControl>
-                    <FormLabel>Course Name</FormLabel>
-                    <Input value={courseName} onChange={(e) => setCourseName(e.target.value)} />
-                </FormControl>
-                <FormControl>
-                    <FormLabel>Course Code</FormLabel>
-                    <Input value={courseCode} onChange={(e) => setCourseCode(e.target.value)} />
-                </FormControl>
-                <Button onClick={handleSubmit} colorScheme="blue">
-                    {editingId ? "Update Course" : "Add Course"}
+  <TextField
+    label="Course Name"
+    value={courseName}
+    fullWidth
+    onChange={(e) => setCourseName(e.target.value)}
+  />
+  <TextField
+    label="Course Code"
+    value={courseCode}
+    fullWidth
+    onChange={(e) => setCourseCode(e.target.value)}
+  />
+  <Button
+    variant="contained"
+    color="primary"
+    onClick={handleSubmit}
+    fullWidth
+  >
+    {editingId ? "Update Course" : "Add Course"}
+  </Button>
+</Stack>
+
+      </Paper>
+
+      <Box mt={5}>
+        <Typography variant="h6" gutterBottom>
+          Courses
+        </Typography>
+        <Divider sx={{ mb: 2 }} />
+        {courses.length > 0 ? (
+          courses.map((course) => (
+            <Paper
+              key={course.id}
+              elevation={1}
+              sx={{
+                p: 2,
+                mb: 2,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Box>
+                <Typography fontWeight="bold">
+                  {course.courseName}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {course.courseCode}
+                </Typography>
+              </Box>
+              <Stack direction="row" spacing={1}>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => handleEdit(course)}
+                >
+                  Edit
                 </Button>
-            </Stack>
-
-            <Heading size="md" mb={2}>Courses</Heading>
-            {courses.length > 0 ? (
-                courses.map((course) => (
-                    <Flex key={course.id} justify="space-between" align="center" p={3} borderWidth="1px" borderRadius="md" mb={2}>
-                        <Box>
-                            <Text><strong>{course.courseName}</strong> ({course.courseCode})</Text>
-                        </Box>
-                        <Stack direction="row">
-                            <Button size="sm" onClick={() => handleEdit(course)}>Edit</Button>
-                            <Button size="sm" colorScheme="red" onClick={() => handleDelete(course.id)}>Delete</Button>
-                        </Stack>
-                    </Flex>
-                ))
-            ) : (
-                <Text>No courses found.</Text>
-            )}
-        </Box>
-    );
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="error"
+                  onClick={() => handleDelete(course.id)}
+                >
+                  Delete
+                </Button>
+              </Stack>
+            </Paper>
+          ))
+        ) : (
+          <Typography>No courses found.</Typography>
+        )}
+      </Box>
+    </Container>
+  );
 };
 
 export default ManageCourses;

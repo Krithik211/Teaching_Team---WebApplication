@@ -1,13 +1,24 @@
-import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import { ChakraProvider } from "@chakra-ui/react";
 import Layout from "@/components/Layout";
+import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+
+const theme = createTheme({
+  palette: {
+    mode: "light", // ✅ keep light theme
+    primary: {
+      main: "#374151", // Tailwind bg-gray-700
+      contrastText: "#fff",
+    },
+  },
+});
+
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <ChakraProvider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
       <Layout>
-      <Component {...pageProps} />
+        <Component {...pageProps} />
       </Layout>
-    </ChakraProvider>
+    </ThemeProvider>
   );
 }
