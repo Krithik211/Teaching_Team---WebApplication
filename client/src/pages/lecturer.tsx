@@ -12,7 +12,6 @@ import React, { useEffect, useState } from "react";
 import { useSelectionStats } from "../hooks/useSelectionStats";
 import { useAuth } from "@/context/AuthContext";
 import { useProtectedRoute } from "@/hooks/useProtectedRoutes";
-import { useCourse } from "@/context/CourseContext";
 import { useLecturer } from "@/context/LecturerContext";
 import {
   BarChart,
