@@ -40,7 +40,7 @@ export default function TutorDashboard() {
         <title>Apply as a Tutor - Teaching Team</title>
         <meta name="description" content="Tutor application form - Teaching Team" />
       </Head>
-
+       <div className="pt-28"> 
       {/* Top navigation bar with sign-out button */}
       <Navigation showSignOut={true} />
 
@@ -55,9 +55,9 @@ export default function TutorDashboard() {
         <h1 className="text-3xl text-gray-900 mb-10 px-10">Submitted Applications</h1>
         <SubmittedApplications />
       </div>
-
+      </div>
       {/* Footer section */}
-      <Footer />
+      <Footer/>
     </>
   );
 };
