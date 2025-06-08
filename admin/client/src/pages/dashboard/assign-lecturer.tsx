@@ -18,7 +18,7 @@ import { Course, LecturerCourseAssignment, User } from "@/types/type";
 
 const AssignLecturer = () => {
   const [lecturers, setLecturers] = useState<User[]>([]);
-  const [semester, setSemester] = useState("");
+  const [semester, setSemester] = useState(null);
   const [assignments, setAssignments] = useState<LecturerCourseAssignment[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedLecturerId, setSelectedLecturerId] = useState<number | null>(null);
@@ -27,7 +27,8 @@ const AssignLecturer = () => {
   const fetchLecturersAndCourses = async () => {
     try {
       const users = await userService.getAllUsers();
-      const onlyLecturers = users.filter((u) => u.roleId === 1);
+      console.log('users', users);
+      const onlyLecturers = users.filter((u) => u.role === 'lecturer');
       setLecturers(onlyLecturers);
 
       const courseList = await courseService.getCourses();
@@ -48,7 +49,7 @@ const AssignLecturer = () => {
       alert("Lecturer assigned successfully!");
       setSelectedLecturerId(null);
       setSelectedCourseId(null);
-      setSemester("");
+      setSemester(null);
       fetchAssignedLecturers(); // refresh assignments
     } catch (error) {
       console.error("Assignment failed:", error);
@@ -99,9 +100,8 @@ const AssignLecturer = () => {
         label="Semester"
         onChange={(e) => setSemester(e.target.value)}
       >
-        <MenuItem value="S1-2025">S1-2025</MenuItem>
-        <MenuItem value="S2-2025">S2-2025</MenuItem>
-        <MenuItem value="Summer-2025">Summer-2025</MenuItem>
+        <MenuItem value="1">Semester 1</MenuItem>
+        <MenuItem value="2">Semester 2</MenuItem>
       </Select>
     </FormControl>
   </Grid>

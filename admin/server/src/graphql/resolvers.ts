@@ -5,8 +5,21 @@ import { LecturerCourse } from "../entity/LecturerCourse";
 
 export const resolvers = {
   Query: {
-    users: async () => await User.find(), user: async (_: any, { id }: { id: number }) =>
-      await User.findOneBy({ id }),
+    // users: async () => await User.find(), user: async (_: any, { id }: { id: number }) =>
+    //   await User.findOneBy({ id }),
+    users: async () => {
+      // User.find() is a TypeORM call that SELECTs * FROM users
+      console.log('user');
+      return await User.find();
+    },
+
+    // 2. “user” query returns a single user matching the given id
+    user: async (_parent: any, args: { id: number }) => {
+      // args.id is the GraphQL argument
+      // findOneBy({ id }) SELECTs * FROM users WHERE id = args.id LIMIT 1
+      console.log('user by ID');
+      return await User.findOneBy({ id: args.id });
+    },
     getCourses: async () => {
       const courses = await Course.find();
       console.log("Fetched courses:", courses); // Add this for debugging
