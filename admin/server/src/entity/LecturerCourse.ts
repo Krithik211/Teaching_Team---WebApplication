@@ -2,22 +2,22 @@ import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, ManyToOne, JoinColu
 import { User } from "./User";
 import { Course } from "./Course";
 
-@Entity({ name: "Lecturer_Course" })
+@Entity({ name: "lecturer_courses" })
 export class LecturerCourse extends BaseEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
+  @Column({name: "userId"})
   lecturerId!: number;
 
-  @Column()
+  @Column({name: "courseId"})
   courseId!: number;
 
   @Column({name: "semesterId"})
   semester!: number;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: "lecturerId" })
+  @JoinColumn({ name: "userId" })
   lecturer!: User;
 
   @ManyToOne(() => Course)

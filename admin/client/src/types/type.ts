@@ -1,8 +1,8 @@
 export interface LecturerCourseAssignment {
   id: number;
-  semesterId: number;
-  userId: number;
-  courseId: number;
+  semester: number;
+  lecturer: any;
+  course: any;
 }
 
 

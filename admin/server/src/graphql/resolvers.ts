@@ -2,24 +2,13 @@
 import { User } from "../entity/User";
 import { Course } from "../entity/Course";
 import { LecturerCourse } from "../entity/LecturerCourse";
+import { CoursePosition } from "../entity/CoursePosition";
 
 export const resolvers = {
   Query: {
-    // users: async () => await User.find(), user: async (_: any, { id }: { id: number }) =>
-    //   await User.findOneBy({ id }),
-    users: async () => {
-      // User.find() is a TypeORM call that SELECTs * FROM users
-      console.log('user');
-      return await User.find();
-    },
-
-    // 2. “user” query returns a single user matching the given id
-    user: async (_parent: any, args: { id: number }) => {
-      // args.id is the GraphQL argument
-      // findOneBy({ id }) SELECTs * FROM users WHERE id = args.id LIMIT 1
-      console.log('user by ID');
-      return await User.findOneBy({ id: args.id });
-    },
+    users: async () => await User.find(), user: async (_: any, { id }: { id: number }) =>
+      await User.findOneBy({ id }),
+    coursePositions: async () => CoursePosition.find(),
     getCourses: async () => {
       const courses = await Course.find();
       console.log("Fetched courses:", courses); // Add this for debugging
@@ -35,18 +24,20 @@ export const resolvers = {
   Mutation: {
     addCourse: async (
       _: any,
-      { courseName, courseCode, semester }: { courseName: string; courseCode: string ; semester:number}
+      { courseName, courseCode, semester, positionIds, }: { courseName: string; courseCode: string ; semester:number, positionIds: number[];}
     ) => {
-      const newCourse = Course.create({ courseName, courseCode, semester });
+      const pos = await CoursePosition.findByIds(positionIds);
+      const newCourse = Course.create({ courseName, courseCode, semester, positions: pos, });
       return await newCourse.save();
     },
 
-    updateCourse: async (_: any, { id, courseName, courseCode, semester }: { id: number, courseName: string, courseCode: string , semester: number}) => {
+    updateCourse: async (_: any, { id, courseName, courseCode, semester, positionIds }: { id: number, courseName: string, courseCode: string , semester: number, positionIds: number[];}) => {
       const course = await Course.findOneBy({ id });
       if (!course) throw new Error("Course not found");
       course.courseName = courseName;
       course.courseCode = courseCode;
       course.semester = semester;
+      course.positions = await CoursePosition.findByIds(positionIds);
       return await course.save();
     },
     assignLecturerToCourse: async (_: any, { lecturerId, courseId, semester }: { lecturerId: number; courseId: number; semester: number }) => {

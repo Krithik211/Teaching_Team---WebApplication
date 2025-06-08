@@ -31,7 +31,7 @@ export function CourseProvider({ children }: { children: React.ReactNode }) {
         }
       }
       fetchData();
-    }, [])
+    })
 
   return (
     <CourseContext.Provider value={{ currentSemesterCourses, setCurrentSemesterCourses }}>

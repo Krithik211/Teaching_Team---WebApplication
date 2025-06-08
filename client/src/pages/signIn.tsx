@@ -45,6 +45,10 @@ export default function SignInPage() {
     console.log("user: ", response);
     const foundUser = response.user;
     setLoading(false);
+    if(foundUser?.isBlocked){
+      toast.success("Hi," + foundUser.firstName + " " + foundUser.lastName + " . You access is restricted contact admin for getting access.");
+      return;
+    }
     if (foundUser) {
       // Successful login logic
       toast.success("Welcome," + foundUser.firstName + " " + foundUser.lastName);

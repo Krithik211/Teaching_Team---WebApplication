@@ -23,4 +23,12 @@ export interface LecturerCourse {
   courseName: string;
   semesterName: string;
 }
+export interface CourseStat {
+  applicationId: number;
+  courseId:      number;
+  courseName:    string;
+  tutorName:     string;
+  selectionCount:number;
+}
+
   

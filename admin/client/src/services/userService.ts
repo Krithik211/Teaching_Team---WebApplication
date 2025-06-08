@@ -10,7 +10,7 @@ const GET_USERS = gql`
       firstName
       lastName
       email
-      roleId
+      role
       isBlocked
     }
   }

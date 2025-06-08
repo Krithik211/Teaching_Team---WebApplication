@@ -15,26 +15,46 @@ const GET_COURSES = gql`
       id           
       courseCode    
       courseName    
-      semester    
+      semester
+      positions {
+        id
+        name
+      }    
     }
   }
 `;
+
+const GET_POSITIONS = gql`
+  query GetCoursePositions {
+    coursePositions {
+      id
+      name
+    }
+  }
+`;
+
 
 const ADD_COURSE = gql`
   mutation AddCourse(
     $courseCode: String!
     $courseName: String!
     $semester: Int!
+    $positionIds: [ID!]!
   ) {
     addCourse(
       courseCode: $courseCode
       courseName: $courseName
       semester: $semester
+      positionIds: $positionIds
     ) {
       id
       courseCode
       courseName
       semester
+      positions {
+        id
+        name
+      }
     }
   }
 `;
@@ -45,17 +65,23 @@ const UPDATE_COURSE = gql`
     $courseCode: String!
     $courseName: String!
     $semester: Int!
+    $positionIds: [ID!]!
   ) {
     updateCourse(
       id: $id
       courseCode: $courseCode
       courseName: $courseName
       semester: $semester
+      positionIds: $positionIds
     ) {
       id
       courseCode
       courseName
       semester
+      positions {
+        id
+        name
+      }
     }
   }
 `;
@@ -80,20 +106,33 @@ const GET_LECTURER_COURSES = gql`
 `;
 
 const ASSIGN_LECTURER_TO_COURSE = gql`
-  mutation AssignLecturerToCourse(
-    $userId: ID!
-    $courseId: ID!
-    $semester: Int!
-  ) {
-    assignLecturerToCourse(
-      userId: $userId
-      courseId: $courseId
-      semester: $semesterId
-    ) {
+  mutation AssignLecturerToCourse($lecturerId: ID!, $courseId: ID!, $semester: Int!) {
+    assignLecturerToCourse(lecturerId: $lecturerId, courseId: $courseId, semester: $semester) {
       id
+      lecturer {
+        firstName
+        lastName
+      }
+      course {
+        courseName
+      }
       semester
-      userId
-      courseId
+    }
+  }
+`;
+
+const GET_ASSIGNED_LECTURERS = gql`
+  query {
+    getAllAssignedLecturers {
+      id
+      lecturer {
+        firstName
+        lastName
+      }
+      course {
+        courseName
+      }
+      semester
     }
   }
 `;
@@ -110,6 +149,10 @@ const DELETE_LECTURER_ASSIGNMENT = gql`
 
 export const courseService = {
   // ── COURSES ───────────────────────────────────────
+  getPositions: async () => {
+    const { data } = await client.query({ query: GET_POSITIONS });
+    return data.coursePositions;
+  },
 
   getCourses: async (): Promise<Course[]> => {
     console.log('get courses')
@@ -120,14 +163,23 @@ export const courseService = {
     return data.getCourses;
   },
 
+  getAllAssignedLecturers: async (): Promise<LecturerCourseAssignment[]> => {
+    const { data } = await client.query({
+      query: GET_ASSIGNED_LECTURERS,
+      fetchPolicy: "no-cache"
+    });
+    return data.getAllAssignedLecturers;
+  },
+
   addCourse: async (
     courseCode: string,
     courseName: string,
-    semester: number
+    semester: number,
+    positionIds: number[]
   ): Promise<Course> => {
     const { data } = await client.mutate({
       mutation: ADD_COURSE,
-      variables: { courseCode, courseName, semester },
+      variables: { courseCode, courseName, semester, positionIds  },
     });
     return data.addCourse;
   },
@@ -136,11 +188,12 @@ export const courseService = {
     id: number,
     courseCode: string,
     courseName: string,
-    semester: number
+    semester: number,
+    positionIds: number[]
   ): Promise<Course> => {
     const { data } = await client.mutate({
       mutation: UPDATE_COURSE,
-      variables: { id, courseCode, courseName, semester },
+      variables: { id, courseCode, courseName, semester, positionIds  },
     });
     return data.updateCourse;
   },
@@ -164,14 +217,14 @@ export const courseService = {
   },
 
   assignLecturerToCourse: async (
-    userId: number,
+    lecturerId: number,
     courseId: number,
     semester: number
   ): Promise<LecturerCourseAssignment> => {
     const { data } = await client.mutate({
       mutation: ASSIGN_LECTURER_TO_COURSE,
       variables: {
-        userId: userId.toString(),
+        lecturerId: lecturerId.toString(),
         courseId: courseId.toString(),
         semester,
       },
