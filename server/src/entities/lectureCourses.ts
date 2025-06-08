@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from "typeorm";
 import { User } from "./user";
 import { Course } from "./course";
 import { Semester } from "./semester";
@@ -8,12 +8,15 @@ export class LecturerCourse {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => User, (user) => user.lecturerCourses, { onDelete: "RESTRICT", onUpdate: "CASCADE" })
-  lecturer!: User;
+@ManyToOne(() => User, u => u.lecturerCourses, { onDelete: 'RESTRICT' })
+@JoinColumn({ name: 'userId' })
+lecturer!: User;
 
-  @ManyToOne(() => Course, (course) => course.lecturerCourses, { onDelete: "RESTRICT", onUpdate: "CASCADE" })
-  course!: Course;
+@ManyToOne(() => Course, c => c.lecturerCourses, { onDelete: 'RESTRICT' })
+@JoinColumn({ name: 'courseId' })
+course!: Course;
 
-  @ManyToOne(() => Semester, (semester) => semester.lecturerCourses, { onDelete: "RESTRICT", onUpdate: "CASCADE" })
-  semester!: Semester;
+@ManyToOne(() => Semester, s => s.lecturerCourses, { onDelete: 'RESTRICT' })
+@JoinColumn({ name: 'semesterId' })
+semester!: Semester;
 }

@@ -30,7 +30,7 @@ const Sidebar = () => {
   [`& .MuiDrawer-paper`]: {
     width: 250,
     boxSizing: "border-box",
-    bgcolor: "#374151", // ✅ Admin menu background
+    bgcolor: "#374151", //  Admin menu background
     color: "#fff",       // Optional: white text
   },
 }}

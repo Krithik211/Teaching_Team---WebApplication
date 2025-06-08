@@ -23,7 +23,7 @@ const ManageCourses = () => {
   const [courseName, setCourseName] = useState("");
   const [courseCode, setCourseCode] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [semester, setSemester] = useState("S1");
+  const [semester, setSemester] = useState('1');
 
 
   const fetchCourses = async () => {
@@ -36,7 +36,7 @@ const ManageCourses = () => {
   };
 
   const handleSubmit = async () => {
-    if (!courseName || !courseCode) {
+    if (!courseName || !courseCode || !semester) {
       alert("All fields are required.");
       return;
     }
@@ -92,8 +92,8 @@ const ManageCourses = () => {
       value={semester}
       onChange={(e) => setSemester(e.target.value)}
     >
-      <FormControlLabel value="S1" control={<Radio />} label="Semester 1" />
-      <FormControlLabel value="S2" control={<Radio />} label="Semester 2" />
+      <FormControlLabel value="1" control={<Radio />} label="Semester 1" />
+      <FormControlLabel value="2" control={<Radio />} label="Semester 2" />
     </RadioGroup>
   </FormControl>
 

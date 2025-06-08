@@ -1,28 +1,37 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, Unique } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  Unique,
+} from "typeorm";
 import { User } from "./user";
 import { TutorApplication } from "./tutorApplication";
 
 @Entity("applicant_rankings")
-@Unique(["user", "application"]) // prevent duplicate entries per lecturer + application
+@Unique(["user", "application"])
 export class ApplicantRanking {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => User, user => user.rankings, {
+  @ManyToOne(() => User, (user) => user.rankings, {
     onDelete: "CASCADE",
-    onUpdate: "CASCADE"
+    onUpdate: "CASCADE",
   })
+  @JoinColumn({ name: "userId" })
   user!: User;
 
-  @ManyToOne(() => TutorApplication, app => app.rankings, {
+  @ManyToOne(() => TutorApplication, (app) => app.rankings, {
     onDelete: "CASCADE",
-    onUpdate: "CASCADE"
+    onUpdate: "CASCADE",
   })
+  @JoinColumn({ name: "applicationID" })
   application!: TutorApplication;
 
   @Column({ name: "rankLevel", type: "varchar", length: 50, nullable: true })
-  rank!: string;
+  rankLevel!: string;
 
-  @Column({ type: "text", nullable: true })
+  @Column({ name: "comment", type: "text", nullable: true })
   comment!: string;
 }

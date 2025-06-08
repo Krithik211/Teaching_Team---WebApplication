@@ -61,7 +61,7 @@ export const userApi = {
     const response = await api.put("/application/updateApplication", application);
     return response.data;
   },
-  getCoursesByLecturerId: async (userID: any): Promise<any> => {
+  getCoursesByLecturerId: async (userID: number): Promise<any> => {
     const response = await api.get(`/request/getLecturerCourses/${userID}`);
     return response.data;
   },

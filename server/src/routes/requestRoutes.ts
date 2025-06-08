@@ -6,6 +6,6 @@ const router = Router();
 
 router.get("/getAllAvatars", getAvatars);
 router.get("/getAllCourses", getCourses);
-router.get("/getLecturerCourses/:lecturerId", getLecturerCourses);
+router.get("/getLecturerCourses/:userID", getLecturerCourses);
 
 export default router;

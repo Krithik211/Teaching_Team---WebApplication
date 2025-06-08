@@ -21,13 +21,14 @@ export function LecturerProvider({ children }: { children: React.ReactNode }) {
       const fetchData = async() => {
         try{
             console.log('userID in context', currentUser?.userId);
+        if(currentUser?.userId){
           const response = await userApi.getCoursesByLecturerId(currentUser?.userId);
           const courses = response.courses;
           if(courses){
             console.log(courses);
             setLecturerCourses(courses);
           }
-        }
+        }}
         catch(error){
           console.error(error);
         }

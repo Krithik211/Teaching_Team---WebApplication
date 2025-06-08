@@ -23,7 +23,7 @@ const USERS_QUERY = gql`
 `;
 
 export const userService = {
-  getAllPets: async (): Promise<User[]> => {
+  getAllUsers: async (): Promise<User[]> => {
     const { data } = await client.query({ query: USERS_QUERY });
     console.log("Fetched Users:", data);
     return data.users;

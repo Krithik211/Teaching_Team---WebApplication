@@ -18,7 +18,7 @@ export const getRankingsByUser = async (req: Request, res: Response): Promise<an
 
     const transformed = rankings.map(r => ({
       applicationId: r.application.applicationID,
-      rank: r.rank,
+      rank: r.rankLevel,
       comment: r.comment
     }));
 
@@ -47,7 +47,7 @@ export const insertAndUpdateRanking = async (req: Request, res: Response): Promi
     });
 
     if (existing) {
-      if (rank !== undefined) existing.rank = rank;
+      if (rank !== undefined) existing.rankLevel = rank;
       if (comment !== undefined) existing.comment = comment;
       await repo.save(existing);
       return res.status(200).json({ message: "Ranking updated" });
@@ -63,7 +63,7 @@ export const insertAndUpdateRanking = async (req: Request, res: Response): Promi
     const newRanking = repo.create({
       user,
       application,
-      rank,
+      rankLevel: rank,
       comment
     });
 
@@ -100,32 +100,3 @@ export const deleteRanking = async (req: Request, res: Response): Promise<any> =
     res.status(500).json({ message: "Server error while deleting" });
   }
 };
-
-// export const deleteRanking = async (req: Request, res: Response): Promise<any> => {
-//   const { userId, applicationId } = req.body;
-
-//   if (!userId || !applicationId) {
-//     return res.status(400).json({ message: "Missing userId or applicationId" });
-//   }
-
-//   try {
-//     const repo = AppDataSource.getRepository(ApplicantRanking);
-//     const existing = await repo.findOne({
-//       where: {
-//         user: { userId },
-//         application: { applicationID: applicationId }
-//       },
-//       relations: ["user", "application"]
-//     });
-
-//     if (!existing) {
-//       return res.status(404).json({ message: "Ranking not found" });
-//     }
-
-//     await repo.remove(existing);
-//     return res.status(200).json({ message: "Ranking deleted" });
-//   } catch (error) {
-//     console.error("Delete ranking error:", error);
-//     return res.status(500).json({ message: "Failed to delete ranking" });
-//   }
-// };

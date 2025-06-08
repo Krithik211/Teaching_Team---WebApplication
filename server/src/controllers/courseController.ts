@@ -22,14 +22,14 @@ export const getCourses = async (req: Request, res: Response): Promise<any> => {
 };
 
 export const getLecturerCourses = async (req: Request, res: Response): Promise<any> => {
-  const { lecturerId } = req.params;
-
+  const { userID } = req.params;
+console.log('userID', userID);
   try {
     const lecturerCourseRepo = AppDataSource.getRepository(LecturerCourse);
 
     const lecturerCourses = await lecturerCourseRepo.find({
       where: {
-        lecturer: { userId: Number(lecturerId) }
+        lecturer: { userId: Number(userID) }
       },
       relations: {
         course: true,
