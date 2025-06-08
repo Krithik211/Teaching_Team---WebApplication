@@ -4,7 +4,7 @@ import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 
 const theme = createTheme({
   palette: {
-    mode: "light", // ✅ keep light theme
+    mode: "light", // keep light theme
     primary: {
       main: "#374151", // Tailwind bg-gray-700
       contrastText: "#fff",
