@@ -4,7 +4,7 @@ import { CoursesResponse } from "@/types/Course";
 import { Application } from "@/types/FormFields";
 
 export const api = axios.create({
-  baseURL: "http://localhost:3001/api", // Adjust this to match your backend URL
+  baseURL: "http://localhost:3002/api", // Adjust this to match your backend URL
 });
 
 export interface LoginRequest {

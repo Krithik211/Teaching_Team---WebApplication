@@ -15,7 +15,13 @@ export const typeDefs = gql`
     courseName: String!
     courseCode: String!
     semester:Int!
+    positions: [CoursePosition!]!
   }
+
+  type CoursePosition {
+    id: ID!
+    name: String!
+}
 
   type LecturerCourse {
     id: ID!
@@ -25,8 +31,8 @@ export const typeDefs = gql`
   }
 
   type Mutation {
-    addCourse(courseName: String!, courseCode: String!, semester: Int!): Course
-    updateCourse(id: ID!, courseName: String!, courseCode: String!, semester:Int!): Course
+    addCourse(courseName: String!, courseCode: String!, semester: Int!, positionIds: [ID!]!): Course
+    updateCourse(id: ID!, courseName: String!, courseCode: String!, semester:Int!, positionIds: [ID!]!): Course
     deleteCourse(id: ID!): Boolean
 
     assignLecturerToCourse(lecturerId: ID!, courseId: ID!, semester: Int!): LecturerCourse
@@ -36,6 +42,7 @@ export const typeDefs = gql`
   }
 
   type Query {
+  coursePositions: [CoursePosition!]!
     users: [User]
     user(id: ID!): User
     getCourses: [Course]

@@ -11,6 +11,7 @@ export type User = {
     lastName: string;
     role: string;
     avatar: Avatar;
+    isBlocked: boolean;
   };
 
 export interface RegisterRequest {

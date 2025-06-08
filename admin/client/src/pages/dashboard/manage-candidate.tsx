@@ -20,7 +20,7 @@ const ManageCandidates = () => {
   const fetchCandidates = async () => {
     try {
       const users = await userService.getAllUsers();
-      const filtered = users.filter((u) => u.roleId === 2); // candidates
+      const filtered = users.filter((u) => u.role === "candidate"); // candidates
       setCandidates(filtered);
     } catch {
       alert("Failed to fetch users");

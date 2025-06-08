@@ -8,12 +8,13 @@ import {
   Stack,
   Paper,
   Divider,
-  Grid,
   RadioGroup,
   FormControlLabel,
   Radio,
-  FormLabel,
   FormControl,
+  MenuItem,
+  InputLabel,
+  Select,
 } from "@mui/material";
 import { courseService } from "@/services/courseService";
 import { Course } from "@/types/type";
@@ -24,38 +25,41 @@ const ManageCourses = () => {
   const [courseCode, setCourseCode] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [semester, setSemester] = useState('1');
+  const [positions, setPositions] = useState<CoursePosition[]>([]);
+  const [selectedPositions, setSelectedPositions] = useState<number[]>([]);
 
 
-const fetchCourses = async () => {
-  console.log(" fetchCourses() start");
-  try {
-    const result = await courseService.getCourses();
-    console.log(" fetchCourses() success:", result);
-    setCourses(result);
-  } catch (err) {
-    console.error(" fetchCourses() error:", err);
-    alert(`Failed to load courses. See console for details.`);
-  }
-};
+  const fetchCourses = async () => {
+    console.log(" fetchCourses() start");
+    try {
+      const result = await courseService.getCourses();
+      console.log(" fetchCourses() success:", result);
+      setCourses(result);
+    } catch (err) {
+      console.error(" fetchCourses() error:", err);
+      alert(`Failed to load courses. See console for details.`);
+    }
+  };
 
   const handleSubmit = async () => {
-    if (!courseName || !courseCode || !semester) {
+    if (!courseName || !courseCode || !semester || selectedPositions.length === 0) {
       alert("All fields are required.");
       return;
     }
 
     try {
       if (editingId !== null) {
-        await courseService.updateCourse(editingId, courseCode, courseName, Number(semester));
+        await courseService.updateCourse(editingId, courseCode, courseName, Number(semester), selectedPositions);
         alert("Course updated.");
         setEditingId(null);
       } else {
-        await courseService.addCourse(courseCode, courseName, Number(semester));
+        await courseService.addCourse(courseCode, courseName, Number(semester), selectedPositions);
         alert("Course added.");
       }
 
       setCourseName("");
       setCourseCode("");
+      setSelectedPositions([]);
       await fetchCourses();
     } catch {
       alert("Operation failed.");
@@ -81,7 +85,8 @@ const fetchCourses = async () => {
   useEffect(() => {
     console.log('use effect');
     fetchCourses();
-  },[]);
+    courseService.getPositions().then(setPositions);
+  }, []);
 
   return (
     <Container maxWidth="sm" sx={{ mt: 4 }}>
@@ -90,38 +95,54 @@ const fetchCourses = async () => {
           Manage Courses
         </Typography>
         <Stack spacing={3} mb={4}>
-  <FormControl>
-    <RadioGroup
-      row
-      value={semester}
-      onChange={(e) => setSemester(e.target.value)}
-    >
-      <FormControlLabel value="1" control={<Radio />} label="Semester 1" />
-      <FormControlLabel value="2" control={<Radio />} label="Semester 2" />
-    </RadioGroup>
-  </FormControl>
+          <FormControl>
+            <RadioGroup
+              row
+              value={semester}
+              onChange={(e) => setSemester(e.target.value)}
+            >
+              <FormControlLabel value="1" control={<Radio />} label="Semester 1" />
+              <FormControlLabel value="2" control={<Radio />} label="Semester 2" />
+            </RadioGroup>
+          </FormControl>
 
-  <TextField
-    label="Course Name"
-    value={courseName}
-    fullWidth
-    onChange={(e) => setCourseName(e.target.value)}
-  />
-  <TextField
-    label="Course Code"
-    value={courseCode}
-    fullWidth
-    onChange={(e) => setCourseCode(e.target.value)}
-  />
-  <Button
-    variant="contained"
-    color="primary"
-    onClick={handleSubmit}
-    fullWidth
-  >
-    {editingId ? "Update Course" : "Add Course"}
-  </Button>
-</Stack>
+          <TextField
+            label="Course Name"
+            value={courseName}
+            fullWidth
+            onChange={(e) => setCourseName(e.target.value)}
+          />
+          <TextField
+            label="Course Code"
+            value={courseCode}
+            fullWidth
+            onChange={(e) => setCourseCode(e.target.value)}
+          />
+          <FormControl fullWidth>
+            <InputLabel id="pos-label">Position(s)</InputLabel>
+            <Select
+              labelId="pos-label"
+              multiple
+              value={selectedPositions}
+              label="Position(s)"
+              onChange={(e) => setSelectedPositions(e.target.value as number[])}
+            >
+              {positions.map((p) => (
+                <MenuItem key={p.id} value={p.id}>
+                  {p.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmit}
+            fullWidth
+          >
+            {editingId ? "Update Course" : "Add Course"}
+          </Button>
+        </Stack>
 
       </Paper>
 

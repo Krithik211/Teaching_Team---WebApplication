@@ -38,4 +38,7 @@ export class User {
 
   @OneToMany(() => ApplicantRanking, ranking => ranking.user)
   rankings!: ApplicantRanking[];
+
+  @Column({ name: "isBlocked", type: "boolean", default:false })
+  isBlocked!: boolean;
 }
