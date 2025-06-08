@@ -1,7 +1,8 @@
 import axios from "axios";
 import { RegisterRequest, User } from "@/types/User";
-import { CoursesResponse } from "@/types/Course";
+import { CoursesResponse , CourseStat } from "@/types/Course";
 import { Application } from "@/types/FormFields";
+
 
 export const api = axios.create({
   baseURL: "http://localhost:3001/api", // Adjust this to match your backend URL
@@ -90,4 +91,9 @@ export const userApi = {
     return await api.delete("/ranking/delete", { data });
   },
 
+  /** Fetch top tutor stats per course for a lecturer */
+  getTopTutorsByLecturer: async (userId: number): Promise<CourseStat[]> => {
+  const { data } = await api.get<{ data: CourseStat[] }>(`/ranking/topTutors/${userId}`)
+  return data.data      // <-- now returns CourseStat[]
+},
 };
