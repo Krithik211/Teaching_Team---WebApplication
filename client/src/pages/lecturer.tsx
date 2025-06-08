@@ -9,21 +9,12 @@
 import Head from "next/head";
 import Navigation from "../components/Navigation";
 import React, { useEffect, useState } from "react";
-import { useSelectionStats } from "../hooks/useSelectionStats";
+import { useCourseTopTutors } from "@/hooks/useCourseTopTutors";
 import { useAuth } from "@/context/AuthContext";
 import { useProtectedRoute } from "@/hooks/useProtectedRoutes";
 import { useLecturer } from "@/context/LecturerContext";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-  Cell,
-} from "recharts";
 import { userApi } from "@/services/api";
+import CourseTopTutorChart from "../components/CourseTopTutorChart";
 
 // Type for tutor applicant data.
 type Applicant = {
@@ -48,6 +39,7 @@ export default function LecturerPage() {
   useProtectedRoute("lecturer");
   const { currentUser } = useAuth();
   const { lecturerCourses } = useLecturer();
+  const lecturerId = currentUser?.userId ?? 0;
   const [error, setError] = useState("");
   const [applicantNotFoundError, setApplicantNotFoundError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -73,10 +65,13 @@ export default function LecturerPage() {
   // A single state variable for inline selection errors.
   const [selectionErrors, setSelectionErrors] = useState<Record<string, string>>({});
 
-  const [mounted, setMounted] = useState(false);
+  
+ const {
+  stats: courseStats,
+  loading: courseLoading,
+  error:  courseError
+} = useCourseTopTutors(lecturerId);
 
-  // Get aggregated statistics using the custom hook.
-  const { mostSelectedNames, mostSelectedCount, leastSelectedNames, leastSelectedCount, unselected } = useSelectionStats();
 
   // Clear toast after a delay.
   useEffect(() => {
@@ -85,10 +80,6 @@ export default function LecturerPage() {
       return () => clearTimeout(timeout);
     }
   }, [toast]);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Load tutor applications.
   useEffect(() => {
@@ -332,14 +323,6 @@ export default function LecturerPage() {
 
 
   // --- End Selection Functions ---
-
-  // Prepare chart data with actual counts.
-  const chartData = [
-    { name: "Most Selected", count: mostSelectedCount },
-    { name: "Least Selected", count: leastSelectedCount },
-    { name: "Unselected", count: unselected.length },
-  ];
-
   return (
     <div className="min-h-screen bg-gray-100 pt-28 pb-10 font-poppins">
       <Head>
@@ -347,52 +330,24 @@ export default function LecturerPage() {
       </Head>
       <Navigation showSignOut={true} />
       <div className="max-w-5xl mx-auto px-4 space-y-6">
-        {/* Visual Representation Section */}
-        <div className="bg-white p-6 rounded-lg shadow mb-6">
-          <h3 className="text-lg font-semibold mb-4 text-gray-800">Selection Overview</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis allowDecimals={false} label={{ value: "Count", angle: -90, position: "insideLeft" }} />
-              <Tooltip />
-              <Bar dataKey="count" radius={[8, 8, 0, 0]} label={{ position: "top", fill: "#374151", fontSize: 12 }}>
-                {chartData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={
-                      entry.name === "Most Selected"
-                        ? "#10b981"
-                        : entry.name === "Least Selected"
-                          ? "#ef4444"
-                          : "#9ca3af"
-                    }
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-          {mounted && (
-            <div className="text-sm mt-4 text-gray-600">
-              <p>
-                <strong>Most Selected:</strong>{" "}
-                {mostSelectedNames.length > 0
-                  ? `${mostSelectedNames.join(", ")} (Count: ${mostSelectedCount})`
-                  : "-"}
-              </p>
-              <p>
-                <strong>Least Selected:</strong>{" "}
-                {leastSelectedNames.length > 0
-                  ? `${leastSelectedNames.join(", ")} (Count: ${leastSelectedCount})`
-                  : "-"}
-              </p>
-              <p>
-                <strong>Unselected Applicants:</strong>{" "}
-                {unselected.length > 0 ? unselected.join(", ") : "None"}
-              </p>
-            </div>
-          )}
-        </div>
+
+     {/* Top Tutors by Course (live DB data) */}
+      <section className="bg-white p-6 rounded-lg shadow mb-6">
+  <h3 className="text-lg font-semibold mb-4 text-gray-800">
+    Top Tutors by Course
+  </h3>
+
+  {courseLoading && <p>Loading…</p>}
+  {courseError   && <p className="text-red-600">{courseError}</p>}
+
+  {!courseLoading && !courseError && courseStats.length === 0 && (
+    <p className="text-gray-600">No tutor selections to show yet.</p>
+  )}
+
+  {!courseLoading && !courseError && courseStats.length > 0 && (
+    <CourseTopTutorChart data={courseStats} />
+  )}
+</section>
 
         {/* Search & Filter Controls */}
         <div className="bg-white p-6 rounded-lg shadow mb-8">
