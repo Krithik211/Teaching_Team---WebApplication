@@ -13,8 +13,8 @@ export class LecturerCourse extends BaseEntity {
   @Column()
   courseId!: number;
 
-  @Column({default:"2025S2"})
-  semester!: string;
+  @Column({name: "semesterId"})
+  semester!: number;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: "lecturerId" })

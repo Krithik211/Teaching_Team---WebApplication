@@ -26,14 +26,17 @@ const ManageCourses = () => {
   const [semester, setSemester] = useState('1');
 
 
-  const fetchCourses = async () => {
-    try {
-      const result = await courseService.getCourses();
-      setCourses(result);
-    } catch {
-      alert("Failed to load courses.");
-    }
-  };
+const fetchCourses = async () => {
+  console.log(" fetchCourses() start");
+  try {
+    const result = await courseService.getCourses();
+    console.log(" fetchCourses() success:", result);
+    setCourses(result);
+  } catch (err) {
+    console.error(" fetchCourses() error:", err);
+    alert(`Failed to load courses. See console for details.`);
+  }
+};
 
   const handleSubmit = async () => {
     if (!courseName || !courseCode || !semester) {
@@ -43,11 +46,11 @@ const ManageCourses = () => {
 
     try {
       if (editingId !== null) {
-        await courseService.updateCourse(editingId, courseName, courseCode);
+        await courseService.updateCourse(editingId, courseCode, courseName, Number(semester));
         alert("Course updated.");
         setEditingId(null);
       } else {
-        await courseService.addCourse(courseName, courseCode);
+        await courseService.addCourse(courseCode, courseName, Number(semester));
         alert("Course added.");
       }
 
@@ -76,8 +79,9 @@ const ManageCourses = () => {
   };
 
   useEffect(() => {
+    console.log('use effect');
     fetchCourses();
-  }, []);
+  },[]);
 
   return (
     <Container maxWidth="sm" sx={{ mt: 4 }}>

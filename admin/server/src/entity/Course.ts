@@ -1,8 +1,8 @@
 import {Entity, PrimaryGeneratedColumn, Column, BaseEntity} from 'typeorm'
 
-@Entity({name: "Courses"})
+@Entity({name: "courses"})
 export class Course extends BaseEntity {
-    @PrimaryGeneratedColumn({name: "Course_id"})
+    @PrimaryGeneratedColumn({name: "course_id"})
     id!:number;
 
     @Column({name: "Course_name"})
@@ -10,4 +10,7 @@ export class Course extends BaseEntity {
 
     @Column({name: "Course_code"})
     courseCode!: string;
+
+    @Column({name: "semesterId"})
+    semester!: number;
 }

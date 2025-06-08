@@ -1,20 +1,16 @@
 export interface LecturerCourseAssignment {
   id: number;
-  semester: string;
-  lecturer: {
-    firstName: string;
-    lastName: string;
-  };
-  course: {
-    courseName: string;
-  };
+  semesterId: number;
+  userId: number;
+  courseId: number;
 }
 
 
 export interface Course {
   id: number;
-  courseName: string;
   courseCode: string;
+  courseName: string;
+  semester: number;
 }
 
 export interface User {

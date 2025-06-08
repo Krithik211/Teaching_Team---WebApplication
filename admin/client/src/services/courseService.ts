@@ -1,75 +1,60 @@
+// src/services/courseService.ts
 import { gql } from "@apollo/client";
 import { client } from "./apollo-client";
 import { Course, LecturerCourseAssignment } from "@/types/type";
 
+/**---------------------------------------------------
+ * 1. GraphQL documents: match your DB columns exactly
+ *--------------------------------------------------*/
+
+// — COURSES —
 
 const GET_COURSES = gql`
   query GetCourses {
     getCourses {
-      id
-      courseName
-      courseCode
+      id           
+      courseCode    
+      courseName    
+      semester    
     }
   }
 `;
-const GET_LECTURERS = gql`
-  query {
-    users {
-      id
-      firstName
-      lastName
-      roleId
-    }
-  }
-`;
-
 
 const ADD_COURSE = gql`
-  mutation AddCourse($courseName: String!, $courseCode: String!) {
-    addCourse(courseName: $courseName, courseCode: $courseCode) {
+  mutation AddCourse(
+    $courseCode: String!
+    $courseName: String!
+    $semester: Int!
+  ) {
+    addCourse(
+      courseCode: $courseCode
+      courseName: $courseName
+      semester: $semester
+    ) {
       id
-      courseName
       courseCode
-    }
-  }
-`;
-
-const UPDATE_COURSE = gql`
-  mutation UpdateCourse($id: ID!, $courseName: String!, $courseCode: String!) {
-    updateCourse(id: $id, courseName: $courseName, courseCode: $courseCode) {
-      id
       courseName
-      courseCode
-    }
-  }
-`;
-const ASSIGN_LECTURER = gql`
-  mutation AssignLecturerToCourse($lecturerId: ID!, $courseId: ID!, $semester: String!) {
-    assignLecturerToCourse(lecturerId: $lecturerId, courseId: $courseId, semester: $semester) {
-      id
-      lecturer {
-        firstName
-        lastName
-      }
-      course {
-        courseName
-      }
       semester
     }
   }
 `;
 
-const GET_ASSIGNED_LECTURERS = gql`
-  query {
-    getAllAssignedLecturers {
+const UPDATE_COURSE = gql`
+  mutation UpdateCourse(
+    $id: ID!
+    $courseCode: String!
+    $courseName: String!
+    $semester: Int!
+  ) {
+    updateCourse(
+      id: $id
+      courseCode: $courseCode
+      courseName: $courseName
+      semester: $semester
+    ) {
       id
-      lecturer {
-        firstName
-        lastName
-      }
-      course {
-        courseName
-      }
+      courseCode
+      courseName
       semester
     }
   }
@@ -81,34 +66,81 @@ const DELETE_COURSE = gql`
   }
 `;
 
+// — LECTURER_COURSES —
+
+const GET_LECTURER_COURSES = gql`
+  query GetLecturerCourses {
+    getLecturerCourses {
+      id           # PK
+      semester   # maps to semesterId
+      userId       # maps to userId
+      courseId     # maps to courseId
+    }
+  }
+`;
+
+const ASSIGN_LECTURER_TO_COURSE = gql`
+  mutation AssignLecturerToCourse(
+    $userId: ID!
+    $courseId: ID!
+    $semester: Int!
+  ) {
+    assignLecturerToCourse(
+      userId: $userId
+      courseId: $courseId
+      semester: $semesterId
+    ) {
+      id
+      semester
+      userId
+      courseId
+    }
+  }
+`;
+
+const DELETE_LECTURER_ASSIGNMENT = gql`
+  mutation DeleteLecturerCourseAssignment($id: ID!) {
+    deleteLecturerCourseAssignment(id: $id)
+  }
+`;
+
+/**---------------------------------------------------
+ * 2. Service methods
+ *--------------------------------------------------*/
+
 export const courseService = {
+  // ── COURSES ───────────────────────────────────────
+
   getCourses: async (): Promise<Course[]> => {
+    console.log('get courses')
     const { data } = await client.query({
       query: GET_COURSES,
-      fetchPolicy: "no-cache"
+      fetchPolicy: "no-cache",
     });
     return data.getCourses;
   },
-  getAllAssignedLecturers: async (): Promise<LecturerCourseAssignment[]> => {
-    const { data } = await client.query({
-      query: GET_ASSIGNED_LECTURERS,
-      fetchPolicy: "no-cache"
-    });
-    return data.getAllAssignedLecturers;
-  },
 
-  addCourse: async (courseName: string, courseCode: string): Promise<Course> => {
+  addCourse: async (
+    courseCode: string,
+    courseName: string,
+    semester: number
+  ): Promise<Course> => {
     const { data } = await client.mutate({
       mutation: ADD_COURSE,
-      variables: { courseName, courseCode },
+      variables: { courseCode, courseName, semester },
     });
     return data.addCourse;
   },
-  updateCourse: async (id: number, courseName: string, courseCode: string): Promise<Course> => {
-    console.log("Sending to GraphQL:", { id, courseName, courseCode });
+
+  updateCourse: async (
+    id: number,
+    courseCode: string,
+    courseName: string,
+    semester: number
+  ): Promise<Course> => {
     const { data } = await client.mutate({
       mutation: UPDATE_COURSE,
-      variables: { id, courseName, courseCode },
+      variables: { id, courseCode, courseName, semester },
     });
     return data.updateCourse;
   },
@@ -120,26 +152,38 @@ export const courseService = {
     });
     return data.deleteCourse;
   },
-  assignLecturerToCourse: async (lecturerId: number, courseId: number, semester: string): Promise<boolean> => {
-    try {
-      const { data, errors } = await client.mutate({
-        mutation: ASSIGN_LECTURER,
-        variables: {
-          lecturerId: lecturerId.toString(),
-          courseId: courseId.toString(),
-          semester
-        },
-      });
-      if (errors && errors.length > 0) {
-        console.error("GraphQL Errors:", errors);
-        return false;
-      }
 
-      return true;
-    } catch (error) {
-      console.error("Apollo Error:", error);
-      return false;
-    }
+  // ── LECTURER_COURSES ─────────────────────────────
+
+  getLecturerCourses: async (): Promise<LecturerCourseAssignment[]> => {
+    const { data } = await client.query({
+      query: GET_LECTURER_COURSES,
+      fetchPolicy: "no-cache",
+    });
+    return data.getLecturerCourses;
   },
 
+  assignLecturerToCourse: async (
+    userId: number,
+    courseId: number,
+    semester: number
+  ): Promise<LecturerCourseAssignment> => {
+    const { data } = await client.mutate({
+      mutation: ASSIGN_LECTURER_TO_COURSE,
+      variables: {
+        userId: userId.toString(),
+        courseId: courseId.toString(),
+        semester,
+      },
+    });
+    return data.assignLecturerToCourse;
+  },
+
+  deleteLecturerCourseAssignment: async (id: number): Promise<boolean> => {
+    const { data } = await client.mutate({
+      mutation: DELETE_LECTURER_ASSIGNMENT,
+      variables: { id },
+    });
+    return data.deleteLecturerCourseAssignment;
+  },
 };

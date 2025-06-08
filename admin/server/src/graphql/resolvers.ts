@@ -22,20 +22,21 @@ export const resolvers = {
   Mutation: {
     addCourse: async (
       _: any,
-      { courseName, courseCode }: { courseName: string; courseCode: string }
+      { courseName, courseCode, semester }: { courseName: string; courseCode: string ; semester:number}
     ) => {
-      const newCourse = Course.create({ courseName, courseCode });
+      const newCourse = Course.create({ courseName, courseCode, semester });
       return await newCourse.save();
     },
 
-    updateCourse: async (_: any, { id, courseName, courseCode }: { id: number, courseName: string, courseCode: string }) => {
+    updateCourse: async (_: any, { id, courseName, courseCode, semester }: { id: number, courseName: string, courseCode: string , semester: number}) => {
       const course = await Course.findOneBy({ id });
       if (!course) throw new Error("Course not found");
       course.courseName = courseName;
       course.courseCode = courseCode;
+      course.semester = semester;
       return await course.save();
     },
-    assignLecturerToCourse: async (_: any, { lecturerId, courseId, semester }: { lecturerId: number; courseId: number; semester: string }) => {
+    assignLecturerToCourse: async (_: any, { lecturerId, courseId, semester }: { lecturerId: number; courseId: number; semester: number }) => {
   const lecturer = await User.findOneBy({ id: lecturerId });
   const course = await Course.findOneBy({ id: courseId });
 
