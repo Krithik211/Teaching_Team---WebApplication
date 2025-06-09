@@ -1,3 +1,14 @@
+/**
+ * This page displays visual statistics related to tutor selection using a dedicated component called `DashboardView`.
+ * The statistics are fetched from the backend via the custom hook `useSelectionStatsFromAPI`, which retrieves
+ * aggregated selection data stored in the MySQL database. This data may include counts such as the number of applicants
+ * selected, top-ranked candidates, or course-wise selection breakdowns. By abstracting this into `DashboardView`,
+ * we isolate the visual representation layer, allowing for clean rendering of charts, tables, or summary boxes
+ * depending on the data. This approach follows good software engineering practice by separating business logic
+ * (data fetching and access control) from presentation logic (data display), and enables future scalability—
+ * such as plugging in new chart libraries or updating visual layouts—without affecting the underlying logic.
+ */
+
 // pages/overview.tsx
 import Head from "next/head";
 import { useRouter } from "next/router";
