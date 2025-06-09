@@ -4,8 +4,10 @@ import { useRouter } from "next/router";
 import Navigation from "@/components/Navigation";
 import DashboardView from "@/components/DashboardView";
 import { useSelectionStatsFromAPI } from "@/hooks/useSelectionStats";
+import { useProtectedRoute } from "@/hooks/useProtectedRoutes";
 
 const OverviewPage = () => {
+  useProtectedRoute("lecturer");
   const stats = useSelectionStatsFromAPI();
   const router = useRouter();
 

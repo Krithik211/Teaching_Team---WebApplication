@@ -1,3 +1,14 @@
+/*
+  This Edit Profile page was implemented using React with TypeScript and integrates form handling, user state management,
+  and backend API communication. Upon component load, it retrieves the current user's data from localStorage and fetches a
+  list of available avatars from the backend. The form fields are prefilled with the user's existing data and are disabled
+  by default until the "Edit Profile" button is clicked. Users can update their personal details, choose a new avatar, and 
+  optionally change their password. The updated information is submitted to the backend via an API call using Axios. Upon a
+  successful update, the new data is saved in localStorage and globally via context, and the user is redirected to a page 
+  based on their role. The UI is styled with Tailwind CSS, ensuring a responsive and accessible design, while toast 
+  notifications provide feedback on success or errors. This structure supports good separation of concerns, scalability, 
+  and maintainability.
+*/
 import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
