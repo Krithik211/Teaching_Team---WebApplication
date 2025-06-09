@@ -1,3 +1,4 @@
+// Required imports and environment config
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { User } from "./entities/user";
@@ -12,6 +13,7 @@ import { ApplicantRanking } from "./entities/applicantRanking";
 
 dotenv.config();
 
+// Database connection setup
 export const AppDataSource = new DataSource({
   type: "mysql",
   host: process.env.DB_HOST,

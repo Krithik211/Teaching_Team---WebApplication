@@ -7,18 +7,21 @@ import {
     CreateDateColumn,
     OneToMany
 } from "typeorm";
-import { User } from "./user"; // Make sure this path is correct
+import { User } from "./user"; 
 import { ApplicantRanking } from "./applicantRanking";
 
+// Define the 'tutorApplications' table
 @Entity("tutorApplications")
 export class TutorApplication {
     @PrimaryGeneratedColumn()
     applicationID!: number;
 
+    // Relation to User
     @ManyToOne(() => User, (user) => user.applications, { onDelete: "SET NULL" })
     @JoinColumn({ name: "userID" })
     user!: User;
 
+    // Application details
     @Column({ nullable: true })
     courseCode!: string;
 

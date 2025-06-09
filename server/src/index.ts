@@ -8,12 +8,14 @@ import requestRoutes from './routes/requestRoutes';
 import applicationRoutes from './routes/applicationRoutes';
 import rankingRoutes from "./routes/rankingRoutes";
 
+// Load environment variables
 dotenv.config();
 const PORT = process.env.PORT || 3002;
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Initialize database and start server
 AppDataSource.initialize()
   .then(() => {
     console.log("Data Source has been initialized!");

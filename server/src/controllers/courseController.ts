@@ -3,6 +3,7 @@ import { AppDataSource } from "../data-source";
 import { Course } from "../entities/course";
 import { LecturerCourse } from "../entities/lectureCourses";
 
+// Get all courses with position mappings
 export const getCourses = async (req: Request, res: Response): Promise<any> => {
   try {
     const courseRepo = AppDataSource.getRepository(Course);
@@ -21,6 +22,7 @@ export const getCourses = async (req: Request, res: Response): Promise<any> => {
   }
 };
 
+// Get courses assigned to a specific lecturer
 export const getLecturerCourses = async (req: Request, res: Response): Promise<any> => {
   const { userID } = req.params;
 console.log('userID', userID);
@@ -37,7 +39,7 @@ console.log('userID', userID);
       }
     });
 
-    // Extract only necessary fields
+    // Return simplified course info
     const filteredCourses = lecturerCourses.map((lc) => ({
       courseCode: lc.course.course_code,
       courseName: lc.course.course_name,

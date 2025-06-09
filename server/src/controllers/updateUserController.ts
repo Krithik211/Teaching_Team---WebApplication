@@ -4,6 +4,7 @@ import { User } from "../entities/user";
 import { Avatar } from "../entities/avatar";
 import bcrypt from "bcryptjs"; 
 
+// Define input structure
 interface UpdateInput {
   firstName: string;
   lastName: string;
@@ -13,6 +14,7 @@ interface UpdateInput {
   avatar_id: number;
 }
 
+// Update user profile
 export const updateUser = async (req: Request, res: Response): Promise<any> => {
   const { userId } = req.params;
   const { firstName, lastName, email, password, role, avatar_id } = req.body;
@@ -28,7 +30,7 @@ export const updateUser = async (req: Request, res: Response): Promise<any> => {
       return res.status(404).json({ message: "User not found." });
     }
 
-    // Update fields
+    // Update basic user fields
     user.firstName = firstName;
     user.lastName = lastName;
     user.email = email;
@@ -49,6 +51,7 @@ export const updateUser = async (req: Request, res: Response): Promise<any> => {
   user.avatar = avatar;
 }
 
+    // Save and return updated user
     const updatedUser = await userRepo.save(user);
     return res.json({ message: "Profile updated", user: updatedUser });
   } catch (error) {

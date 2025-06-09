@@ -4,6 +4,7 @@ import { deleteRanking, getRankingsByUser, insertAndUpdateRanking, getAllSelecte
 
 const router = Router();
 
+// Define ranking-related routes
 router.get("/getExistingRanking/:userId", getRankingsByUser);
 router.post("/insertAndUpdate", insertAndUpdateRanking);
 router.delete("/delete", deleteRanking);

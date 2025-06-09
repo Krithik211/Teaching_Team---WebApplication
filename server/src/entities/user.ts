@@ -3,11 +3,14 @@ import { Avatar } from "./avatar";
 import { TutorApplication } from "./tutorApplication";
 import { LecturerCourse } from "./lectureCourses";
 import { ApplicantRanking } from "./applicantRanking";
-@Entity({ name: "users" }) // Use the actual table name
+
+// Define the 'users' table
+@Entity({ name: "users" }) 
 export class User {
   @PrimaryGeneratedColumn({ name: "user_id" })
   userId!: number;
  
+  // Basic user details
   @Column({ name: "first_name", type: "varchar", length: 100 })
   firstName!: string;
  
@@ -30,6 +33,7 @@ export class User {
   @JoinColumn({ name: "avatar_id" })
   avatar!: Avatar;
  
+  // Relations to other entities
   @OneToMany(() => TutorApplication, (application) => application.user)
   applications!: TutorApplication[];
  

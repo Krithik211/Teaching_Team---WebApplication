@@ -3,8 +3,7 @@ import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { Avatar } from "../entities/avatar";
 
-// ------------------- GET ALL AVATARS -------------------
-
+// Fetch all avatars from the database
 export const getAvatars = async (req: Request, res: Response): Promise<any> => {
   try {
     const avatarRepo = AppDataSource.getRepository(Avatar);

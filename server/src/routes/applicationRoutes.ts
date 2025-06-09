@@ -3,6 +3,7 @@ import { saveApplication, getApplicationByUserId, updateTutorApplication, getApp
 
 const router = Router();
 
+// Define application-related routes
 router.post("/saveApplication", saveApplication);
 router.get("/getApplicationByUserId/:userId", getApplicationByUserId);
 router.put("/updateApplication",updateTutorApplication);

@@ -1,5 +1,6 @@
+// Import ts-jest preset
 const { createDefaultPreset } = require("ts-jest");
-
+// Get default transform config
 const tsJestTransformCfg = createDefaultPreset().transform;
 
 module.exports = {
