@@ -149,3 +149,20 @@ export const getApplicationsByLecturer = async (req: Request, res: Response): Pr
         return res.status(500).json({ message: "Failed to retrieve applications." });
     }
 };
+
+export const getAllApplications = async (req: Request, res: Response): Promise<any> => {
+    try {
+        console.log('Get all applications')
+        const repo = AppDataSource.getRepository(TutorApplication);
+        const allApplications = await repo.find();
+
+        if (!allApplications) {
+            return res.status(200).json({ message: "Application not found" });
+        }
+
+        res.status(200).json({ allApplications });
+    } catch (error) {
+        console.error("Update failed:", error);
+        res.status(500).json({ message: "Failed to update application" });
+    }
+};

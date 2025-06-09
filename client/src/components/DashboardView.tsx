@@ -1,11 +1,5 @@
-// --- Component: DashboardView.tsx ---
-import {
-  Box,
-  Text,
-  UnorderedList,
-  ListItem,
-  Divider,
-} from "@chakra-ui/react";
+// --- Component: DashboardView.tsx (Stat Visualisation Version) ---
+import React from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -14,84 +8,85 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
-  LabelList,
+  Cell,
+  Label
 } from "recharts";
 
-interface CourseComputedStats {
-  mostChosen: any;
-  leastChosen: any;
-  notChosen: { name: string; email: string }[];
+interface Stats {
+  mostSelectedNames: string[];
+  mostSelectedCount: number;
+  leastSelectedNames: string[];
+  leastSelectedCount: number;
+  unselected: string[];
 }
 
 interface DashboardViewProps {
-  courseStats: Record<string, Record<string, CourseComputedStats>>;
+  data: Stats;
 }
 
-const DashboardView = ({ courseStats }: DashboardViewProps) => {
+const DashboardView: React.FC<DashboardViewProps> = ({ data }) => {
+  console.log("data", data);
+  const {
+    mostSelectedCount,
+    mostSelectedNames,
+    leastSelectedCount,
+    leastSelectedNames,
+    unselected,
+  } = data;
+
+  const chartData = [
+    { name: "Most Selected", count: mostSelectedCount },
+    { name: "Least Selected", count: leastSelectedCount },
+    { name: "Unselected", count: unselected.length },
+  ];
+
   return (
-    <>
-      {Object.entries(courseStats).map(([course, positionStats]) => (
-        <Box key={course} mb={12} borderWidth="1px" borderRadius="lg" p={6}>
-          <Text fontSize="xl" fontWeight="bold" mb={4}>Course: {course}</Text>
+    <div className="bg-white p-6 rounded-lg shadow mb-6">
+      <h3 className="text-lg font-semibold mb-4 text-gray-800">Selection Overview</h3>
+      <ResponsiveContainer width="100%" height={250}>
+        <BarChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis allowDecimals={false}>
+            <Label value="Count" angle={-90} position="insideLeft" />
+          </YAxis>
+          <Tooltip />
+          <Bar dataKey="count" radius={[8, 8, 0, 0]} label={{ position: "top", fill: "#374151", fontSize: 12 }}>
+            {chartData.map((entry, index) => (
+              <Cell
+                key={`cell-${index}`}
+                fill={
+                  entry.name === "Most Selected"
+                    ? "#10b981"
+                    : entry.name === "Least Selected"
+                    ? "#ef4444"
+                    : "#9ca3af"
+                }
+              />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
 
-          {Object.entries(positionStats).map(([position, stats]) => {
-            const chartData = [
-              { label: stats.mostChosen?.label || "N/A", count: stats.mostChosen?.count || 0 },
-              { label: stats.leastChosen?.label || "N/A", count: stats.leastChosen?.count || 0 },
-              { label: "Not Chosen", count: stats.notChosen.length },
-            ];
-
-            return (
-              <Box key={position} mb={8}>
-                <Text fontSize="lg" fontWeight="semibold">Position: {position}</Text>
-
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="label" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="count" fill="#3182CE">
-                      <LabelList dataKey="count" position="top" />
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-
-                <Divider my={4} />
-                <Text fontWeight="semibold">Most Chosen Applicant:</Text>
-                {stats.mostChosen ? (
-                  <UnorderedList>
-                    <ListItem>Name: {stats.mostChosen.name}</ListItem>
-                    <ListItem>Email: {stats.mostChosen.email}</ListItem>
-                    <ListItem>Lecturers: {stats.mostChosen.count}</ListItem>
-                  </UnorderedList>
-                ) : <Text>No applicant ranked</Text>}
-
-                <Text fontWeight="semibold" mt={4}>Least Chosen Applicant:</Text>
-                {stats.leastChosen ? (
-                  <UnorderedList>
-                    <ListItem>Name: {stats.leastChosen.name}</ListItem>
-                    <ListItem>Email: {stats.leastChosen.email}</ListItem>
-                    <ListItem>Lecturers: {stats.leastChosen.count}</ListItem>
-                  </UnorderedList>
-                ) : <Text>No applicant ranked</Text>}
-
-                <Text fontWeight="semibold" mt={4}>Not Chosen Applicants:</Text>
-                {stats.notChosen.length > 0 ? (
-                  <UnorderedList>
-                    {stats.notChosen.map((a) => (
-                      <ListItem key={a.email}>{a.name}</ListItem>
-                    ))}
-                  </UnorderedList>
-                ) : <Text>All applicants were ranked</Text>}
-              </Box>
-            );
-          })}
-        </Box>
-      ))}
-    </>
+      <div className="text-sm mt-4 text-gray-600">
+        <p>
+          <strong>Most Selected:</strong>{" "}
+          {mostSelectedNames.length > 0
+            ? `${mostSelectedNames.join(", ")} (Count: ${mostSelectedCount})`
+            : "-"}
+        </p>
+        <p>
+          <strong>Least Selected:</strong>{" "}
+          {leastSelectedNames.length > 0
+            ? `${leastSelectedNames.join(", ")} (Count: ${leastSelectedCount})`
+            : "-"}
+        </p>
+        <p>
+          <strong>Unselected Applicants:</strong>{" "}
+          {unselected.length > 0 ? unselected.join(", ") : "None"}
+        </p>
+      </div>
+    </div>
   );
 };
 

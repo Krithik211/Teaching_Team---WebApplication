@@ -21,3 +21,12 @@ export interface User {
   role: string;
   isBlocked : boolean;
 }
+
+export interface TutorApplication {
+  applicationID: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  courseCode: string;
+  course: string;
+}

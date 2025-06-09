@@ -9,13 +9,13 @@
 import Head from "next/head";
 import Navigation from "../components/Navigation";
 import React, { useEffect, useState } from "react";
-import { useCourseTopTutors } from "@/hooks/useCourseTopTutors";
 import { useAuth } from "@/context/AuthContext";
 import { useProtectedRoute } from "@/hooks/useProtectedRoutes";
 import { useLecturer } from "@/context/LecturerContext";
 import { userApi } from "@/services/api";
-import CourseTopTutorChart from "../components/CourseTopTutorChart";
-
+import { useSelectionStatsFromAPI } from "@/hooks/useSelectionStats";
+import DashboardView from "../components/DashboardView";
+import Link from "next/link";
 // Type for tutor applicant data.
 type Applicant = {
   applicationId: string;
@@ -39,7 +39,6 @@ export default function LecturerPage() {
   useProtectedRoute("lecturer");
   const { currentUser } = useAuth();
   const { lecturerCourses } = useLecturer();
-  const lecturerId = currentUser?.userId ?? 0;
   const [error, setError] = useState("");
   const [applicantNotFoundError, setApplicantNotFoundError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -64,14 +63,7 @@ export default function LecturerPage() {
   const [toast, setToast] = useState("");
   // A single state variable for inline selection errors.
   const [selectionErrors, setSelectionErrors] = useState<Record<string, string>>({});
-
-  
- const {
-  stats: courseStats,
-  loading: courseLoading,
-  error:  courseError
-} = useCourseTopTutors(lecturerId);
-
+  const stats = useSelectionStatsFromAPI();
 
   // Clear toast after a delay.
   useEffect(() => {
@@ -86,35 +78,35 @@ export default function LecturerPage() {
     if (!currentUser) return;
 
     const fetchData = async () => {
-    const response = await  userApi.getApplicationByLecturerID(currentUser.userId);
-    const allApplications = response.applications;
-    if (allApplications || allApplications.length > 0) {
-      setApplicantNotFoundError("");
-      setApplicants(allApplications);
-      setFiltered(allApplications);
+      const response = await userApi.getApplicationByLecturerID(currentUser.userId);
+      const allApplications = response.applications;
+      if (allApplications || allApplications.length > 0) {
+        setApplicantNotFoundError("");
+        setApplicants(allApplications);
+        setFiltered(allApplications);
+      }
+      else {
+        setApplicantNotFoundError("No applications submitted by tutor so far...");
+      }
     }
-    else {
-      setApplicantNotFoundError("No applications submitted by tutor so far...");
-    }
-  }
     fetchData();
 
   }, [currentUser]);
 
   useEffect(() => {
-  if (!currentUser?.userId) return;
+    if (!currentUser?.userId) return;
 
-  const fetchRankings = async () => {
-    try {
-      const res = await userApi.getExistingRanking(currentUser.userId);
-      setSelectedApplicants(res.rankings);
-    } catch (err) {
-      console.error("Error loading rankings", err);
-    }
-  };
+    const fetchRankings = async () => {
+      try {
+        const res = await userApi.getExistingRanking(currentUser.userId);
+        setSelectedApplicants(res.rankings);
+      } catch (err) {
+        console.error("Error loading rankings", err);
+      }
+    };
 
-  fetchRankings();
-}, [currentUser?.userId]);
+    fetchRankings();
+  }, [currentUser?.userId]);
 
   // Filtering function.
   const handleSearch = () => {
@@ -189,31 +181,31 @@ export default function LecturerPage() {
   };
 
   const handleRemoveSelection = async (applicationId: string) => {
-  try {
-    // Call API to delete ranking
-    await userApi.deleteRanking({
-      userId: currentUser?.userId,
-      applicationId
+    try {
+      // Call API to delete ranking
+      await userApi.deleteRanking({
+        userId: currentUser?.userId,
+        applicationId
+      });
+
+      // Update UI state
+      const updated = selectedApplicants.filter(entry => entry.applicationId !== applicationId);
+      setSelectedApplicants(updated);
+      setToast("Applicant unselected");
+    } catch (error) {
+      console.error("Failed to remove selection:", error);
+      setToast("Error unselecting applicant");
+    }
+
+    // UI cleanup
+    setExpanded(prev => prev.filter(id => id !== applicationId));
+    setSelectionFormOpen(prev => prev.filter(id => id !== applicationId));
+    setTempSelection(prev => {
+      const newState = { ...prev };
+      delete newState[applicationId];
+      return newState;
     });
-
-    // Update UI state
-    const updated = selectedApplicants.filter(entry => entry.applicationId !== applicationId);
-    setSelectedApplicants(updated);
-    setToast("Applicant unselected");
-  } catch (error) {
-    console.error("Failed to remove selection:", error);
-    setToast("Error unselecting applicant");
-  }
-
-  // UI cleanup
-  setExpanded(prev => prev.filter(id => id !== applicationId));
-  setSelectionFormOpen(prev => prev.filter(id => id !== applicationId));
-  setTempSelection(prev => {
-    const newState = { ...prev };
-    delete newState[applicationId];
-    return newState;
-  });
-};
+  };
 
   //updating the changes function
   const handleRankChange = (applicationId: string, rank: string) => {
@@ -247,65 +239,67 @@ export default function LecturerPage() {
   };
 
   const handleSubmitSelection = async (applicationId: string) => {
-  const draft = tempSelection[applicationId];
+    const draft = tempSelection[applicationId];
 
-  if (!draft || (!draft.rank && !draft.comment.trim())) {
-    setSelectionErrors(prev => ({
-      ...prev,
-      [applicationId]: "Please enter a rank or comment.",
-    }));
-    return;
-  }
-
-  setSelectionErrors(prev => {
-    const newState = { ...prev };
-    delete newState[applicationId];
-    return newState;
-  });
-
-  try {
-    // Save or update in DB via backend API
-    await userApi.saveRanking({
-      userId: currentUser?.userId,
-      applicationId,
-      rank: draft.rank,
-      comment: draft.comment
-    });
-
-    // Update UI state
-    const existing = selectedApplicants.find(entry => entry.applicationId === applicationId);
-    let updatedApplicants: SelectedApplicant[];
-
-    if (existing) {
-      updatedApplicants = selectedApplicants.map(entry =>
-        entry.applicationId === applicationId
-          ? { ...entry, rank: draft.rank as SelectedApplicant["rank"], comment: draft.comment }
-          : entry
-      );
-      setToast("Selection updated");
-    } else {
-      updatedApplicants = [
-        ...selectedApplicants,
-        { applicationId, rank: draft.rank as "" | "topChoice" | "strongCandidate" | "considered",
-           comment: draft.comment }
-      ];
-      setToast("Applicant selected");
+    if (!draft || (!draft.rank && !draft.comment.trim())) {
+      setSelectionErrors(prev => ({
+        ...prev,
+        [applicationId]: "Please enter a rank or comment.",
+      }));
+      return;
     }
 
-    setSelectedApplicants(updatedApplicants);
-  } catch (error) {
-    console.error("Failed to save ranking:", error);
-    setToast("Error saving selection");
-  }
+    setSelectionErrors(prev => {
+      const newState = { ...prev };
+      delete newState[applicationId];
+      return newState;
+    });
 
-  // UI cleanup
-  setSelectionFormOpen(prev => prev.filter(id => id !== applicationId));
-  setTempSelection(prev => {
-    const newState = { ...prev };
-    delete newState[applicationId];
-    return newState;
-  });
-};
+    try {
+      // Save or update in DB via backend API
+      await userApi.saveRanking({
+        userId: currentUser?.userId,
+        applicationId,
+        rank: draft.rank,
+        comment: draft.comment
+      });
+
+      // Update UI state
+      const existing = selectedApplicants.find(entry => entry.applicationId === applicationId);
+      let updatedApplicants: SelectedApplicant[];
+
+      if (existing) {
+        updatedApplicants = selectedApplicants.map(entry =>
+          entry.applicationId === applicationId
+            ? { ...entry, rank: draft.rank as SelectedApplicant["rank"], comment: draft.comment }
+            : entry
+        );
+        setToast("Selection updated");
+      } else {
+        updatedApplicants = [
+          ...selectedApplicants,
+          {
+            applicationId, rank: draft.rank as "" | "topChoice" | "strongCandidate" | "considered",
+            comment: draft.comment
+          }
+        ];
+        setToast("Applicant selected");
+      }
+
+      setSelectedApplicants(updatedApplicants);
+    } catch (error) {
+      console.error("Failed to save ranking:", error);
+      setToast("Error saving selection");
+    }
+
+    // UI cleanup
+    setSelectionFormOpen(prev => prev.filter(id => id !== applicationId));
+    setTempSelection(prev => {
+      const newState = { ...prev };
+      delete newState[applicationId];
+      return newState;
+    });
+  };
 
   //for displaying the rank in the UI
   const getRankLabel = (rank: SelectedApplicant["rank"]) => {
@@ -331,23 +325,14 @@ export default function LecturerPage() {
       <Navigation showSignOut={true} />
       <div className="max-w-5xl mx-auto px-4 space-y-6">
 
-     {/* Top Tutors by Course (live DB data) */}
-      <section className="bg-white p-6 rounded-lg shadow mb-6">
-  <h3 className="text-lg font-semibold mb-4 text-gray-800">
-    Top Tutors by Course
-  </h3>
-
-  {courseLoading && <p>Loading…</p>}
-  {courseError   && <p className="text-red-600">{courseError}</p>}
-
-  {!courseLoading && !courseError && courseStats.length === 0 && (
-    <p className="text-gray-600">No tutor selections to show yet.</p>
-  )}
-
-  {!courseLoading && !courseError && courseStats.length > 0 && (
-    <CourseTopTutorChart data={courseStats} />
-  )}
-</section>
+        {/* Top Tutors by Course (live DB data) */}
+        <Link
+          href="/overview"
+          className="flex items-center gap-2 text-purple-600 hover:underline"
+        >
+          <span className="text-xl">📊</span>
+          <span>View Selection Stats</span>
+        </Link>
 
         {/* Search & Filter Controls */}
         <div className="bg-white p-6 rounded-lg shadow mb-8">

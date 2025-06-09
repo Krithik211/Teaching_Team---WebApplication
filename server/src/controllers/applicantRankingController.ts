@@ -89,65 +89,22 @@ export const deleteRanking = async (req: Request, res: Response): Promise<any> =
   }
 };
 
-/**
- * GET /api/ranking/topTutors/:userId
- * Returns, for each course the lecturer teaches,
- * the single tutor with the highest selection count.
- */
-export async function getTopTutorsByCourse(
-  req: Request<{ userId: string }>,
-  res: Response
-): Promise<void> {
-  const lecturerId = Number(req.params.userId);
-
+export const getAllSelectedApplications = async (req: Request, res: Response): Promise<any> => {
   try {
-    const qb = AppDataSource.getRepository(ApplicantRanking)
-      .createQueryBuilder("r")
-      .innerJoin("r.application", "app")
-        .innerJoin(
-    "courses",      // table name in the DB
-    "course",       // alias
-    "course.course_code = app.courseCode"
-  )
-     .innerJoin("r.user", "tutor")
-      .innerJoin(
-        "lecturer_courses",
-        "lc",
-        "lc.courseId = course.course_id AND lc.userId = :lecturerId",
-        { lecturerId }
-      )
-      // pick up the app.applicationID field
-      .select("course.course_id", "courseId")
-      .addSelect("course.course_name", "courseName")
-      .addSelect("app.applicationID", "applicationId") 
-      .addSelect("CONCAT(tutor.first_name,' ',tutor.last_name)", "tutorName")
-      .addSelect("COUNT(r.id)", "selectionCount")
-      .addSelect(
-        `ROW_NUMBER() OVER (
-           PARTITION BY course.course_id
-           ORDER BY COUNT(r.id) DESC
-         )`,
-        "rn"
-      )
-      .groupBy("course.course_id")
-      .addGroupBy("course.course_name")  
-      .addGroupBy("tutor.user_id")
-      .addGroupBy("app.applicationID");    // make sure to group by the new column
+    const repo = AppDataSource.getRepository(ApplicantRanking);
 
-    const raw = await qb.getRawMany();
-    const top = (raw as any[])
-      .filter(row => Number(row.rn) === 1)
-      .map(row => ({
-        courseId:       Number(row.courseId),
-        courseName:     row.courseName,
-        applicationId:  Number(row.applicationId),  // now present
-        tutorName:      row.tutorName,
-        selectionCount: Number(row.selectionCount),
-      }));
+    const rankings = await repo.find({
+      relations: ["application"]
+    });
 
-    res.status(200).json({ data: top });
-  } catch (err) {
-    console.error("Error in getTopTutorsByCourse:", err);
-    res.status(500).json({ message: "Unable to fetch top tutors." });
+    // Extract only the application details
+    const selectedApplications = rankings.map(r => r.application);
+
+    res.status(200).json({ applications: selectedApplications });
+  } catch (error) {
+    console.error("Error fetching selected applications:", error);
+    res.status(500).json({ message: "Failed to fetch selected applications." });
   }
-}
+};
+
+
