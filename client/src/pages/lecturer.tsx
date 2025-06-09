@@ -324,7 +324,7 @@ export default function LecturerPage() {
       <Navigation showSignOut={true} />
       <div className="max-w-5xl mx-auto px-4 space-y-6">
 
-        {/* Top Tutors by Course (live DB data) */}
+        {/* For viewing selection stats */}
         <Link
           href="/overview"
           className="flex items-center gap-2 text-purple-600 hover:underline"

@@ -1,4 +1,6 @@
 // src/components/assign-lecturer.tsx
+
+// AssignLecturer component: allows admin to assign a lecturer to a specific course and semester
 import { useEffect, useState } from "react";
 import {
   Box,
@@ -18,7 +20,7 @@ import { userService } from "@/services/userService";
 import { Course, LecturerCourseAssignment, User } from "@/types/type";
 
 const AssignLecturer = () => {
-  // --- state ---
+  // --- state: lists of lecturers, courses, and existing assignments, plus selected values ---
   const [lecturers, setLecturers] = useState<User[]>([]);
   const [semester, setSemester] = useState<number | "">("");
   const [courses, setCourses] = useState<Course[]>([]);
@@ -26,17 +28,18 @@ const AssignLecturer = () => {
   const [selectedLecturerId, setSelectedLecturerId] = useState<number | null>(null);
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
 
-  // --- load lecturers & assignments on mount ---
+  // --- load lecturers and current assignments once when component mounts ---
   useEffect(() => {
     const fetchLecturers = async () => {
       try {
         const users = await userService.getAllUsers();
-        console.log('users on frontend', users);
+        // filter only users with role "lecturer"
         setLecturers(users.filter((u) => u.role === "lecturer"));
       } catch {
         alert("Failed to load lecturers.");
       }
     };
+
     const fetchAssignments = async () => {
       try {
         const data = await courseService.getAllAssignedLecturers();
@@ -45,16 +48,18 @@ const AssignLecturer = () => {
         alert("Failed to load assignments.");
       }
     };
+
     fetchLecturers();
     fetchAssignments();
   }, []);
 
-  // --- whenever semester changes, reload courses for that semester ---
+  // --- reload course list whenever the selected semester changes ---
   useEffect(() => {
     if (semester) {
       const fetchCourses = async () => {
         try {
           const courseList = await courseService.getCourses();
+          // optionally filter by semester if API supports it
           setCourses(courseList);
         } catch {
           alert("Failed to load courses for selected semester.");
@@ -62,28 +67,34 @@ const AssignLecturer = () => {
       };
       fetchCourses();
     } else {
+      // clear courses if no semester selected
       setCourses([]);
     }
   }, [semester]);
 
-  // --- handle assignment ---
+  // --- handle the "Assign Lecturer" button click ---
   const handleAssign = async () => {
+    // all fields must be selected before assigning
     if (!selectedLecturerId || !selectedCourseId || !semester) {
       alert("All fields are required.");
       return;
     }
+
     try {
+      // call service to create assignment record
       await courseService.assignLecturerToCourse(
         selectedLecturerId,
         selectedCourseId,
         semester as number
       );
       alert("Lecturer assigned successfully!");
-      // reset form
+
+      // reset form inputs after successful assignment
       setSelectedLecturerId(null);
       setSelectedCourseId(null);
       setSemester("");
-      // refresh list
+
+      // refresh assignment list to include the new entry
       const data = await courseService.getAllAssignedLecturers();
       setAssignments(data);
     } catch (error) {
@@ -93,13 +104,15 @@ const AssignLecturer = () => {
   };
 
   return (
+    // main container for the form and assignment list
     <Container maxWidth="md" sx={{ mt: 4 }}>
+      {/* Form for assigning a lecturer to a course */}
       <Paper elevation={3} sx={{ p: 4 }}>
         <Typography variant="h5" gutterBottom>
           Assign Lecturer to Course
         </Typography>
         <Grid container spacing={3} direction="column">
-          {/* Lecturer */}
+          {/* Lecturer dropdown */}
           <Grid item xs={12}>
             <FormControl fullWidth>
               <InputLabel>Lecturer</InputLabel>
@@ -117,7 +130,7 @@ const AssignLecturer = () => {
             </FormControl>
           </Grid>
 
-          {/* Semester */}
+          {/* Semester selector */}
           <Grid item xs={12}>
             <FormControl fullWidth>
               <InputLabel>Semester</InputLabel>
@@ -133,7 +146,7 @@ const AssignLecturer = () => {
             </FormControl>
           </Grid>
 
-          {/* Course */}
+          {/* Course dropdown */}
           <Grid item xs={12}>
             <FormControl fullWidth>
               <InputLabel>Course</InputLabel>
@@ -151,7 +164,7 @@ const AssignLecturer = () => {
             </FormControl>
           </Grid>
 
-          {/* Button */}
+          {/* Assign button */}
           <Grid item xs={12}>
             <Button variant="contained" fullWidth onClick={handleAssign}>
               Assign Lecturer
@@ -160,14 +173,18 @@ const AssignLecturer = () => {
         </Grid>
       </Paper>
 
-      {/* Current Assignments */}
+      {/* Display list of current assignments below the form */}
       <Box mt={6}>
         <Typography variant="h6" gutterBottom>
           Current Assignments
         </Typography>
         <Divider sx={{ mb: 2 }} />
         {assignments.map((a) => (
-          <Paper key={a.id} elevation={1} sx={{ mb: 2, p: 2, borderLeft: "4px solid #3F4C5E" }}>
+          <Paper
+            key={a.id}
+            elevation={1}
+            sx={{ mb: 2, p: 2, borderLeft: "4px solid #3F4C5E" }}
+          >
             <Typography>
               <strong>Lecturer:</strong> {a.lecturer.firstName} {a.lecturer.lastName}
             </Typography>
@@ -179,6 +196,8 @@ const AssignLecturer = () => {
             </Typography>
           </Paper>
         ))}
+
+        {/* Show message when no assignments are available */}
         {assignments.length === 0 && (
           <Typography color="text.secondary">No assignments found.</Typography>
         )}

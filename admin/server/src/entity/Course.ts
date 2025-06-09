@@ -1,25 +1,36 @@
-import {Entity, PrimaryGeneratedColumn, Column, BaseEntity, ManyToMany, JoinTable} from 'typeorm'
+// src/entities/Course.ts
+
+// Course entity: represents the "courses" table and its many-to-many relationship with CoursePosition
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, ManyToMany, JoinTable } from 'typeorm';
 import { CoursePosition } from './CoursePosition';
 
-@Entity({name: "courses"})
+// Map this class to the "courses" table in the database
+@Entity({ name: 'courses' })
 export class Course extends BaseEntity {
-    @PrimaryGeneratedColumn({name: "course_id"})
-    id!:number;
+  // Auto-generated primary key column named "course_id"
+  @PrimaryGeneratedColumn({ name: 'course_id' })
+  id!: number;
 
-    @Column({name: "Course_name"})
-    courseName!: string;
+  // Column for the course's display name, mapped to "Course_name"
+  @Column({ name: 'Course_name' })
+  courseName!: string;
 
-    @Column({name: "Course_code"})
-    courseCode!: string;
+  // Column for the unique course code, mapped to "Course_code"
+  @Column({ name: 'Course_code' })
+  courseCode!: string;
 
-    @Column({name: "semesterId"})
-    semester!: number;
+  // Column storing the semester identifier, mapped to "semesterId"
+  @Column({ name: 'semesterId' })
+  semester!: number;
 
-    @ManyToMany(() => CoursePosition, { eager: true })
-    @JoinTable({
-    name: "course_positions_map",
-    joinColumn: { name: "course_id"},
-    inverseJoinColumn: { name: "position_id" },
+  // Many-to-many relationship with CoursePosition
+  // Eager loading ensures positions are retrieved whenever a Course is fetched
+  @ManyToMany(() => CoursePosition, { eager: true })
+  @JoinTable({
+    // Specify join table details for the many-to-many link
+    name: 'course_positions_map',            // join table name
+    joinColumn: { name: 'course_id' },       // this entity's key column
+    inverseJoinColumn: { name: 'position_id' } // related entity's key column
   })
   positions!: CoursePosition[];
 }
