@@ -30,6 +30,22 @@ export const typeDefs = gql`
     semester: Int!
   }
 
+  type TutorApplication {
+  applicationID: Int!
+  firstName: String!
+  lastName: String!
+  email: String!
+  courseCode: String!
+  course: String!
+}
+
+type ApplicantRanking {
+  id: Int!
+  rankLevel: String
+  comment: String
+  application: TutorApplication!
+}
+
   type Mutation {
     addCourse(courseName: String!, courseCode: String!, semester: Int!, positionIds: [ID!]!): Course
     updateCourse(id: ID!, courseName: String!, courseCode: String!, semester:Int!, positionIds: [ID!]!): Course
@@ -43,9 +59,11 @@ export const typeDefs = gql`
 
   type Query {
   coursePositions: [CoursePosition!]!
-    users: [User]
-    user(id: ID!): User
-    getCourses: [Course]
+  users: [User]
+  user(id: ID!): User
+  getCourses: [Course]
   getAllAssignedLecturers: [LecturerCourse]
+  getAllApplicantsRanking: [TutorApplication!]!
+  getAllApplicantions: [TutorApplication!]!
   }
 `;

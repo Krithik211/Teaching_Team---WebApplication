@@ -22,7 +22,6 @@ export function CourseProvider({ children }: { children: React.ReactNode }) {
           const response = await userApi.getCourses();
           const courses = response.courses;
           if(courses){
-            console.log(courses);
             setCurrentSemesterCourses(courses);
           }
         }

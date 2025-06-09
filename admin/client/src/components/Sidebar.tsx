@@ -87,7 +87,7 @@ const Sidebar = () => {
             <ListItemText primary="Block Candidate" />
           </ListItemButton>
         </Link>
-        <Link href="/dashboard/reports" passHref legacyBehavior>
+        <Link href="/dashboard/report" passHref legacyBehavior>
           <ListItemButton
     component="a"
     sx={{

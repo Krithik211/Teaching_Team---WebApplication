@@ -91,9 +91,14 @@ export const userApi = {
     return await api.delete("/ranking/delete", { data });
   },
 
-  /** Fetch top tutor stats per course for a lecturer */
-  getTopTutorsByLecturer: async (userId: number): Promise<CourseStat[]> => {
-  const { data } = await api.get<{ data: CourseStat[] }>(`/ranking/topTutors/${userId}`)
-  return data.data      // <-- now returns CourseStat[]
+getAllTutorApplications: async () => {
+  const response = await api.get("/application/allApplication");
+  console.log('response', response);
+  return response.data;
 },
+
+  getSelectedTutorApplications: async () => {
+    const response = await api.get("/ranking/stats");
+    return response.data;
+  },
 };
