@@ -14,7 +14,6 @@ import { useProtectedRoute } from "@/hooks/useProtectedRoutes";
 import { useLecturer } from "@/context/LecturerContext";
 import { userApi } from "@/services/api";
 import { useSelectionStatsFromAPI } from "@/hooks/useSelectionStats";
-import DashboardView from "../components/DashboardView";
 import Link from "next/link";
 // Type for tutor applicant data.
 type Applicant = {
