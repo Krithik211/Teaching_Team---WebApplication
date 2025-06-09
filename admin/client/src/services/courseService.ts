@@ -1,6 +1,4 @@
-// services/courseService.ts
-
-// courseService: encapsulates all GraphQL operations related to courses and lecturer assignments
+// src/services/courseService.ts
 import { gql } from "@apollo/client";
 import { client } from "./apollo-client";
 import { Course, LecturerCourseAssignment } from "@/types/type";
@@ -9,33 +7,33 @@ import { Course, LecturerCourseAssignment } from "@/types/type";
  * 1. GraphQL documents: match your DB columns exactly
  *--------------------------------------------------*/
 
-// Query to fetch all courses along with their associated positions
+// — COURSES —
+
 const GET_COURSES = gql`
   query GetCourses {
     getCourses {
-      id           // primary key of the course
-      courseCode   // unique code identifier for the course
-      courseName   // human-readable name of the course
-      semester     // semester number (e.g., 1 or 2)
-      positions {  // list of position roles available for this course
+      id           
+      courseCode    
+      courseName    
+      semester
+      positions {
         id
         name
-      }
+      }    
     }
   }
 `;
 
-// Query to fetch all possible course positions (for dropdowns and multi-selects)
 const GET_POSITIONS = gql`
   query GetCoursePositions {
     coursePositions {
-      id    // primary key of the position
-      name  // descriptive name of the position
+      id
+      name
     }
   }
 `;
 
-// Mutation to add a new course with selected positions
+
 const ADD_COURSE = gql`
   mutation AddCourse(
     $courseCode: String!
@@ -61,7 +59,6 @@ const ADD_COURSE = gql`
   }
 `;
 
-// Mutation to update an existing course and its positions
 const UPDATE_COURSE = gql`
   mutation UpdateCourse(
     $id: ID!
@@ -89,33 +86,28 @@ const UPDATE_COURSE = gql`
   }
 `;
 
-// Mutation to delete a course by its ID
 const DELETE_COURSE = gql`
   mutation DeleteCourse($id: ID!) {
     deleteCourse(id: $id)
   }
 `;
 
-// Query to fetch all lecturer-course assignment records
+// — LECTURER_COURSES —
+
 const GET_LECTURER_COURSES = gql`
   query GetLecturerCourses {
     getLecturerCourses {
-      id           // assignment record primary key
-      semester     // semester number associated with the assignment
-      userId       // ID of the lecturer
-      courseId     // ID of the course
+      id           # PK
+      semester   # maps to semesterId
+      userId       # maps to userId
+      courseId     # maps to courseId
     }
   }
 `;
 
-// Mutation to assign a lecturer to a given course and semester
 const ASSIGN_LECTURER_TO_COURSE = gql`
   mutation AssignLecturerToCourse($lecturerId: ID!, $courseId: ID!, $semester: Int!) {
-    assignLecturerToCourse(
-      lecturerId: $lecturerId
-      courseId: $courseId
-      semester: $semester
-    ) {
+    assignLecturerToCourse(lecturerId: $lecturerId, courseId: $courseId, semester: $semester) {
       id
       lecturer {
         firstName
@@ -129,7 +121,6 @@ const ASSIGN_LECTURER_TO_COURSE = gql`
   }
 `;
 
-// Query to fetch all assigned lecturers with details
 const GET_ASSIGNED_LECTURERS = gql`
   query {
     getAllAssignedLecturers {
@@ -146,7 +137,6 @@ const GET_ASSIGNED_LECTURERS = gql`
   }
 `;
 
-// Mutation to remove a lecturer-course assignment record
 const DELETE_LECTURER_ASSIGNMENT = gql`
   mutation DeleteLecturerCourseAssignment($id: ID!) {
     deleteLecturerCourseAssignment(id: $id)
@@ -154,29 +144,33 @@ const DELETE_LECTURER_ASSIGNMENT = gql`
 `;
 
 /**---------------------------------------------------
- * 2. Service methods for invoking GraphQL operations
+ * 2. Service methods
  *--------------------------------------------------*/
 
 export const courseService = {
-  // ── Positions ─────────────────────────────────────
-  // Retrieve all course positions for use in forms
+  // ── COURSES ───────────────────────────────────────
   getPositions: async () => {
     const { data } = await client.query({ query: GET_POSITIONS });
     return data.coursePositions;
   },
 
-  // ── Courses ────────────────────────────────────────
-  // Fetch the full list of courses without caching
   getCourses: async (): Promise<Course[]> => {
-    console.log('Fetching courses from API');
+    console.log('get courses')
     const { data } = await client.query({
       query: GET_COURSES,
-      fetchPolicy: "no-cache"
+      fetchPolicy: "no-cache",
     });
     return data.getCourses;
   },
 
-  // Add a new course record with the specified positions
+  getAllAssignedLecturers: async (): Promise<LecturerCourseAssignment[]> => {
+    const { data } = await client.query({
+      query: GET_ASSIGNED_LECTURERS,
+      fetchPolicy: "no-cache"
+    });
+    return data.getAllAssignedLecturers;
+  },
+
   addCourse: async (
     courseCode: string,
     courseName: string,
@@ -185,12 +179,11 @@ export const courseService = {
   ): Promise<Course> => {
     const { data } = await client.mutate({
       mutation: ADD_COURSE,
-      variables: { courseCode, courseName, semester, positionIds }
+      variables: { courseCode, courseName, semester, positionIds  },
     });
     return data.addCourse;
   },
 
-  // Update an existing course by ID
   updateCourse: async (
     id: number,
     courseCode: string,
@@ -200,31 +193,29 @@ export const courseService = {
   ): Promise<Course> => {
     const { data } = await client.mutate({
       mutation: UPDATE_COURSE,
-      variables: { id, courseCode, courseName, semester, positionIds }
+      variables: { id, courseCode, courseName, semester, positionIds  },
     });
     return data.updateCourse;
   },
 
-  // Remove a course by its ID
   deleteCourse: async (id: number): Promise<boolean> => {
     const { data } = await client.mutate({
       mutation: DELETE_COURSE,
-      variables: { id }
+      variables: { id },
     });
     return data.deleteCourse;
   },
 
-  // ── Lecturer Assignments ───────────────────────────
-  // Fetch all lecturer-course assignment entries
-  getAllAssignedLecturers: async (): Promise<LecturerCourseAssignment[]> => {
+  // ── LECTURER_COURSES ─────────────────────────────
+
+  getLecturerCourses: async (): Promise<LecturerCourseAssignment[]> => {
     const { data } = await client.query({
-      query: GET_ASSIGNED_LECTURERS,
-      fetchPolicy: "no-cache"
+      query: GET_LECTURER_COURSES,
+      fetchPolicy: "no-cache",
     });
-    return data.getAllAssignedLecturers;
+    return data.getLecturerCourses;
   },
 
-  // Create a new lecturer-course assignment
   assignLecturerToCourse: async (
     lecturerId: number,
     courseId: number,
@@ -235,18 +226,17 @@ export const courseService = {
       variables: {
         lecturerId: lecturerId.toString(),
         courseId: courseId.toString(),
-        semester
-      }
+        semester,
+      },
     });
     return data.assignLecturerToCourse;
   },
 
-  // Delete a lecturer assignment by its record ID
   deleteLecturerCourseAssignment: async (id: number): Promise<boolean> => {
     const { data } = await client.mutate({
       mutation: DELETE_LECTURER_ASSIGNMENT,
-      variables: { id }
+      variables: { id },
     });
     return data.deleteLecturerCourseAssignment;
-  }
+  },
 };
