@@ -1,37 +1,32 @@
 ```mermaid
 erDiagram
-    AVATARS {
-        int     avatar_id PK
-        varchar avatar_url
-    }
     USERS {
-        int     user_id PK
+        int     id PK
         varchar email
         varchar password
-        varchar first_name
-        varchar last_name
+        varchar username
         varchar role
-        timestamp date_joined
+        varchar academicBackground
+        varchar firstName
+        varchar lastName
+        varchar phoneNumber
+        varchar specialization
+        varchar avatar
+        timestamp dateOfJoining
         tinyint isBlocked
-        int     avatar_id FK
     }
     SEMESTERS {
         int     id PK
         varchar semester_name
     }
-    COURSES {
-        int     course_id PK
+    COURSE {
+        int     id PK
         varchar course_code
-        varchar course_name
+        varchar name
+        text    description
+        text    skillsets_required
+        date    last_date
         int     semesterId FK
-    }
-    COURSE_POSITION {
-        int     position_id PK
-        varchar position_name
-    }
-    COURSE_POSITIONS_MAP {
-        int course_id    FK
-        int position_id  FK
     }
     LECTURER_COURSES {
         int id PK
@@ -39,40 +34,30 @@ erDiagram
         int courseId   FK
         int semesterId FK
     }
-    TUTORAPPLICATIONS {
-        int    applicationID PK
-        int    userID        FK
-        text   availability
-        text   previousRole
-        text   skills
-        varchar qualification
-        varchar specialization
-        datetime submitted_at
-        varchar courseCode
-        varchar firstName
-        varchar lastName
+    APPLICATIONS {
+        int     id PK
+        int     userId               FK
+        varchar course              FK "Course.course_code"
+        varchar username
         varchar email
-        varchar mobile
-        varchar course
-        varchar position
-    }
-    APPLICANT_RANKINGS {
-        int    id PK
-        varchar rankLevel
-        text   comment
-        int    userId        FK
-        int    applicationID FK
+        varchar phoneNumber
+        varchar name
+        varchar availability
+        varchar previousRoles
+        varchar skills
+        varchar credentials
+        varchar rank
+        varchar comment
+        varchar status
     }
 
     %% relationships
-    AVATARS              ||--o{ USERS                 : provides avatar for
-    USERS                ||--o{ LECTURER_COURSES      : "teaches"
-    COURSES              ||--o{ LECTURER_COURSES      : "assigned in"
-    SEMESTERS            ||--o{ LECTURER_COURSES      : "semester of"
-    SEMESTERS            ||--o{ COURSES               : offers
-    USERS                ||--o{ TUTORAPPLICATIONS     : submits
-    USERS                ||--o{ APPLICANT_RANKINGS    : gives
-    TUTORAPPLICATIONS    ||--o{ APPLICANT_RANKINGS    : receives
-    COURSES              ||--o{ COURSE_POSITIONS_MAP  : includes
-    COURSE_POSITION      ||--o{ COURSE_POSITIONS_MAP  : maps_to
+    USERS                ||--o{ LECTURER_COURSES  : teaches
+    COURSE               ||--o{ LECTURER_COURSES  : assigned_in
+    SEMESTERS            ||--o{ LECTURER_COURSES  : semester_of
+
+    SEMESTERS            ||--o{ COURSE             : offers
+
+    USERS                ||--o{ APPLICATIONS       : "submits application"
+    COURSE               ||--o{ APPLICATIONS       : "applied_for"
 ```
