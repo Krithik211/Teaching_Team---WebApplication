@@ -11,7 +11,7 @@ export const AppDataSource = new DataSource({
   type: "mysql",
   host: "209.38.26.237",
   port: 3306,
-  /* Change to your own credentials */
+  /* credentials */
   username: "S4001201",
   password: "Nihil@01",
   database: "S4001201",
